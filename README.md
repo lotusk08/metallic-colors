@@ -64,11 +64,11 @@ import { Metallic } from "metallic-colors/react"
 ```js
 import { PAINT_DECK, CLASSIC_METALS, PRESETS, presetByCode } from "metallic-colors/presets"
 
-presetByCode("M17")       // { code: "M17", name: "Gold", localName: "Nhũ vàng", face: "#ec9d00", mid: "#ffeb5e", sheen: "#fffd89" }
+presetByCode("M17")       // { code: "M17", name: "Gold", face: "#ec9d00", mid: "#ffeb5e", sheen: "#fffd89" }
 presetByCode("rose-gold") // { code: "rose-gold", name: "Rose Gold", face: "#c98a7e", mid: "#e8b8ad", sheen: "#ffe9e3" }
 ```
 
-- `PAINT_DECK` — twenty-four metallic wall-paint tones, each read three times from a printed colour card (face-on, part-turned, into the light). English names describe the tone; `localName` is the name as printed on the card.
+- `PAINT_DECK` — twenty-four metallic wall-paint tones, each read three times from a printed colour card (face-on, part-turned, into the light).
 - `CLASSIC_METALS` — sixteen familiar metals (silver, chrome, platinum, aluminium, titanium, pewter, gunmetal, graphite, white gold, champagne, yellow gold, brass, rose gold, copper, bronze, steel blue), authored rather than photographed. Use them as they are, or as starting points.
 - `PRESETS` — both, and `presetByCode` looks a tone up by code, case-insensitively.
 
@@ -85,18 +85,21 @@ The same recipe in Sass alone, for a project with no JavaScript in its styling. 
 }
 ```
 
+With a bundler, point Sass at `node_modules` (`loadPaths`) or use the `pkg:` importer: `@use "pkg:metallic-colors/scss"`.
+
 `surface($face, $sheen, $mid: null, $flop: null)` writes the `background` and `--metallic-sheen`; the element still needs the `metallic` class, or `@include metallic.base` on its own selector. `surface-background(...)` and `surface-sweep(...)` return the values if you would rather place them yourself.
 
-Every setting is a `!default`, overridable at `@use` time:
+Every setting is a `!default`, overridable at `@use` time. Sass configures a module only on its first load, so put the `with` block on whichever of the two you load first — the class entry forwards the settings:
 
 ```scss
-@use "metallic-colors/scss" as metallic with (
+@use "metallic-colors/scss/metallic" with (
   $band-angle: 135deg,   // where the light comes from
   $band-alpha: 0.7,      // a harder, brighter flash
   $cross-alpha: 0.2,     // a calmer surface
   $flop-drop: 0.16,      // a deeper flop for a coarse flake
   $flake: none,          // no grain
 );
+@use "metallic-colors/scss" as metallic;         // already configured
 ```
 
 | Setting | Default | What it is |

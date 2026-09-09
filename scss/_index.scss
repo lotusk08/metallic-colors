@@ -7,7 +7,9 @@
 //     @include metallic.surface(#ec9d00, #fffd89, $mid: #ffeb5e);
 //   }
 //
-// Every setting is a `!default` you can override at `@use` time:
+// Every setting is a `!default` you can override at `@use` time — on the
+// FIRST load of the module, which is how Sass works: if you also load the
+// class entry (scss/metallic), put the `with` block on that one instead.
 //
 //   @use "metallic-colors/scss" with ($band-angle: 135deg, $band-alpha: .7);
 //

@@ -64,9 +64,7 @@ test("the presets: a photographed deck of 24, sixteen classic metals, unique cod
     }
     assert.ok(t.name.length > 0, `${t.code} name`)
   }
-  for (const t of PAINT_DECK) assert.ok(t.localName, `${t.code} localName`)
   assert.equal(presetByCode("m17")?.name, "Gold")
-  assert.equal(presetByCode("M17")?.localName, "Nhũ vàng")
   assert.equal(presetByCode("Rose-Gold")?.name, "Rose Gold")
   assert.equal(presetByCode("M99"), undefined)
 })

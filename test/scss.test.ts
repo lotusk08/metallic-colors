@@ -66,3 +66,13 @@ test("metallic.css is the compiled Sass entry (npm run build:css)", async () => 
   const compiled = sass.compile("scss/metallic.scss", { style: "expanded" }).css.trim()
   assert.equal(committed, compiled)
 })
+
+test("the class entry takes the configuration and the module follows already configured", () => {
+  const css = compile(`
+    @use "metallic" with ($band-angle: 135deg);
+    @use "index" as m;
+    .x { @include m.surface(#5c7a99, #d5e6f5); }
+  `)
+  assert.ok(css.includes(".metallic {"))
+  assert.ok(css.includes("linear-gradient(135deg"))
+})

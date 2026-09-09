@@ -75,7 +75,7 @@
         apply(tile, tone)
         const lbl = document.createElement("div")
         lbl.className = "lbl"
-        lbl.innerHTML = `${tone.name}<small>${tone.code}${tone.localName ? " · " + tone.localName : ""}</small>`
+        lbl.innerHTML = `${tone.name}<small>${tone.code}</small>`
         card.append(tile, lbl)
         grid.append(card)
       }
