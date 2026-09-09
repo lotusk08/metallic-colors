@@ -130,15 +130,15 @@ Every setting is a `!default`, overridable at `@use` time. Sass configures a mod
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `$gloss` | `1` | The coating's shine: scales the hot line, the band, the sweep, and widens the highlight as it falls. |
-| `$grain`, `$grain-strength`, `$grain-blend` | `brushed`, `0.85`, `overlay` | The grain: `brushed` streaks along the sheen, isotropic `flake`, or `none`. |
+| `$grain`, `$grain-strength`, `$grain-blend` | `brushed`, `0.2`, `overlay` | The grain: `brushed` streaks along the sheen, isotropic `flake`, or `none`. |
 | `$glints` | `0.35` | Sparse bright points from the flake; `0` for none. |
-| `$scratches` | `0` | Fine scratches across the surface; `0` for none. |
-| `$hot`, `$hot-width` | `0.35`, `2%` | The hot line on the crest of the highlight, and its half-width. |
+| `$scratches` | `0` | Hairline scratches along the grain; `0` for none. |
+| `$hot`, `$hot-width` | `0.05`, `2%` | The hot line on the crest of the highlight, and its half-width. |
 | `$body-angle`, `$body` | `120deg`, 4 stops | The opaque body: sunk toward the flop. |
-| `$band-angle`, `$band`, `$band-alpha` | `120deg`, 11 stops, `0.55` | The specular band, peaking in the sheen at 36%. |
-| `$cross-angle`, `$cross`, `$cross-alpha` | `60deg`, 8 stops, `0.5` | The darker crossing band. |
-| `$flop-drop`, `$flop-chroma` | `0.4`, `0.9` | How a derived flop sits below the face (oklab L) and how much chroma it keeps. |
-| `$sweep-alpha`, `$sweep-angle`, `$sweep-duration`, `$sweep-easing` | `0.55`, `112deg`, `0.55s`, cubic-bezier | The hover sweep. |
+| `$band-angle`, `$band`, `$band-alpha` | `120deg`, 11 stops, `0.8` | The specular band, peaking in the sheen at 36%. |
+| `$cross-angle`, `$cross`, `$cross-alpha` | `60deg`, 8 stops, `0.7` | The darker crossing band. |
+| `$flop-drop`, `$flop-chroma` | `0.25`, `0.9` | How a derived flop sits below the face (oklab L) and how much chroma it keeps. |
+| `$sweep-alpha`, `$sweep-angle`, `$sweep-duration`, `$sweep-easing` | `0.65`, `112deg`, `0.55s`, cubic-bezier | The hover sweep. |
 | `$bevel` | five shadows | The chip's edge; `none` for a flat fill. |
 | `$finishes` | six maps | The finishes as overrides of the settings above; add your own. |
 
@@ -198,7 +198,7 @@ import {
 | `metallicStyle(tone, recipe?)` | `{ backgroundImage, backgroundSize, backgroundBlendMode, "--metallic-sheen" }` — the same as an inline-style object. |
 | `readings(tone, recipe?)` | The four readings in oklab, the missing ones derived. |
 | `FINISHES`, `DEFAULT_RECIPE` | The six finishes as full recipes; the default is `FINISHES.brushed`. Pass a partial `Recipe` to override anything. |
-| `brushed(angle, strength)`, `flake()`, `glints(strength)`, `scratches(strength)` | The textures as CSS `<image>` values, if you want them on their own. |
+| `brushed(angle, strength)`, `flake()`, `glints(strength)`, `scratches(strength, angle)` | The textures as CSS `<image>` values, if you want them on their own. |
 | `Metallic` (`metallic-colors/react`) | A component: `tone`, `recipe?`, `as?`, plus any element props. |
 | `PAINT_DECK`, `CLASSIC_METALS`, `PRESETS`, `presetByCode` (`metallic-colors/presets`) | The calibrated tones. |
 | `metallic-colors/scss`, `metallic-colors/scss/metallic` | The Sass module (mixins, finishes and settings) and the Sass entry that emits `.metallic`. |
@@ -209,15 +209,15 @@ import {
 | Key | Default | What it is |
 | --- | --- | --- |
 | `gloss` | `1` | From matte (0) to mirror (1). |
-| `grain`, `grainStrength`, `grainBlend` | `"brushed"`, `0.85`, `"overlay"` | The grain, its depth, its blend mode. |
+| `grain`, `grainStrength`, `grainBlend` | `"brushed"`, `0.2`, `"overlay"` | The grain, its depth, its blend mode. |
 | `glints` | `0.35` | Bright points; `0` for none. |
-| `scratches` | `0` | Fine scratches; `0` for none. |
-| `hot`, `hotWidth` | `0.35`, `2` | The hot line's opacity and half-width in %. |
+| `scratches` | `0` | Hairline scratches along the grain; `0` for none. |
+| `hot`, `hotWidth` | `0.05`, `2` | The hot line's opacity and half-width in %. |
 | `bodyAngle`, `body` | `120`, 4 stops | The body. |
-| `bandAngle`, `band`, `bandAlpha` | `120`, 11 stops, `0.55` | The specular band. |
-| `crossAngle`, `cross`, `crossAlpha` | `60`, 8 stops, `0.5` | The crossing band. |
-| `flopDrop`, `flopChroma` | `0.4`, `0.9` | The derived flop. |
-| `sweepAlpha` | `0.55` | The hover sweep's opacity. |
+| `bandAngle`, `band`, `bandAlpha` | `120`, 11 stops, `0.8` | The specular band. |
+| `crossAngle`, `cross`, `crossAlpha` | `60`, 8 stops, `0.7` | The crossing band. |
+| `flopDrop`, `flopChroma` | `0.25`, `0.9` | The derived flop. |
+| `sweepAlpha` | `0.65` | The hover sweep's opacity. |
 
 ## Browser support
 

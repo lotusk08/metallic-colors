@@ -18,9 +18,9 @@ test("the brushed default: glints, brushed grain, hot line, band, cross, body", 
 
 test("the hot line sits on the band's peak, in the sheen, and the sweep is the sheen", () => {
   const s = metallicSurface(gold)
-  assert.ok(s.layers[2].includes("rgba(255, 253, 137, 0.35) 36%"))
-  assert.ok(s.layers[3].includes("rgba(255, 253, 137, 0.55) 36%"))
-  assert.equal(s.sweep, "rgba(255, 253, 137, 0.55)")
+  assert.ok(s.layers[2].includes("rgba(255, 253, 137, 0.05) 36%"))
+  assert.ok(s.layers[3].includes("rgba(255, 253, 137, 0.8) 36%"))
+  assert.equal(s.sweep, "rgba(255, 253, 137, 0.65)")
 })
 
 test("the finishes", () => {
@@ -91,9 +91,16 @@ test("gloss scales the specular: matte drops the hot line and dims the sweep", (
   const dull = metallicSurface(gold, { gloss: 0 })
   assert.equal(glossy.layers.length, 6)
   assert.equal(dull.layers.length, 5)
-  assert.equal(dull.sweep, "rgba(255, 253, 137, 0.22)")
-  assert.ok(dull.layers[2].includes("rgba(255, 253, 137, 0.275)"))
+  assert.equal(dull.sweep, "rgba(255, 253, 137, 0.26)")
+  assert.ok(dull.layers[2].includes("rgba(255, 253, 137, 0.4)"))
   const half = metallicSurface(gold, { gloss: 0.8 })
-  assert.ok(half.layers[2].includes("rgba(255, 253, 137, 0.28) 36%"))
+  assert.ok(half.layers[2].includes("rgba(255, 253, 137, 0.04) 36%"))
   assert.ok(half.layers[2].includes(" 33.6%"))
+})
+
+test("scratches follow the grain and take the band angle", () => {
+  const s = metallicSurface(gold, { scratches: 0.5, bandAngle: 150 })
+  assert.equal(s.layers.length, 7)
+  assert.ok(decodeURIComponent(s.layers[1]).includes("rotate(60 160 160)"))
+  assert.ok(decodeURIComponent(s.layers[1]).includes("opacity='0.5'"))
 })

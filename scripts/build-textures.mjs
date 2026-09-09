@@ -16,7 +16,7 @@ $glint-size: ${TEMPLATES.glints.size}px;
 $scratch-size: ${TEMPLATES.scratches.size}px;
 
 @function round3($x) {
-  @return math.div(math.round($x * 1000), 1000);
+  @return math.div(math.round($x * 1000 + 0.000000001), 1000);
 }
 
 @function flake() {
@@ -35,8 +35,9 @@ $scratch-size: ${TEMPLATES.scratches.size}px;
   @return ${sass("glints", { THRESHOLD: "#{round3($threshold)}", SLOPE: "#{$slope}" })};
 }
 
-@function scratches($strength) {
-  @return ${sass("scratches", { OPACITY: "#{round3($strength)}" })};
+@function scratches($strength, $angle) {
+  $deg: round3(math.div($angle, 1deg));
+  @return ${sass("scratches", { OPACITY: "#{round3($strength)}", ANGLE: "#{$deg}" })};
 }
 `)
 console.log("scss/_textures.scss written")

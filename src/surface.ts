@@ -42,30 +42,30 @@ const BRUSHED: Recipe = {
     [0, -0.5], [15, -0.2], [25, 0.2], [32, 0.7], [36, 1], [40, 0.75],
     [50, 0.35], [65, 0.05], [70, 0.05], [85, -0.2], [100, -0.5],
   ],
-  bandAlpha: 0.55,
+  bandAlpha: 0.8,
   crossAngle: 60,
   cross: [
     [0, -1], [10, -0.7], [25, -0.2], [40, -1],
     [60, -0.2], [70, -0.9], [90, -0.6], [100, -1],
   ],
-  crossAlpha: 0.5,
-  hot: 0.35,
+  crossAlpha: 0.7,
+  hot: 0.05,
   hotWidth: 2,
   gloss: 1,
   grain: "brushed",
-  grainStrength: 0.85,
+  grainStrength: 0.2,
   grainBlend: "overlay",
   glints: 0.35,
   scratches: 0,
-  flopDrop: 0.4,
+  flopDrop: 0.25,
   flopChroma: 0.9,
-  sweepAlpha: 0.55,
+  sweepAlpha: 0.65,
 }
 
 export const FINISHES: Record<"brushed" | "polished" | "flake" | "satin" | "matte" | "worn", Recipe> = {
   brushed: BRUSHED,
-  polished: { ...BRUSHED, grain: "none", glints: 0.2, hot: 0.45, flopDrop: 0.36 },
-  flake: { ...BRUSHED, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.6, hot: 0.3 },
+  polished: { ...BRUSHED, grain: "none", glints: 0.2, hot: 0.3, flopDrop: 0.3 },
+  flake: { ...BRUSHED, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.6, hot: 0.15 },
   satin: {
     ...BRUSHED,
     body: [[0, 0.15], [35, 0], [65, -0.35], [100, -0.6]],
@@ -74,6 +74,7 @@ export const FINISHES: Record<"brushed" | "polished" | "flake" | "satin" | "matt
       [50, 0.3], [65, 0], [70, 0], [85, -0.2], [100, -0.35],
     ],
     bandAlpha: 0.55,
+    crossAngle: 60,
     cross: [
       [0, -0.6], [10, -0.4], [25, 0.05], [40, -0.6],
       [60, 0.05], [70, -0.5], [90, -0.4], [100, -0.6],
@@ -88,8 +89,8 @@ export const FINISHES: Record<"brushed" | "polished" | "flake" | "satin" | "matt
     flopDrop: 0.1,
     flopChroma: 0.85,
   },
-  matte: { ...BRUSHED, gloss: 0.2, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.15, crossAlpha: 0.35, flopDrop: 0.25 },
-  worn: { ...BRUSHED, gloss: 0.7, scratches: 0.7, glints: 0.25, grainStrength: 0.7 },
+  matte: { ...BRUSHED, gloss: 0.2, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.15, crossAlpha: 0.45, flopDrop: 0.2 },
+  worn: { ...BRUSHED, gloss: 0.75, scratches: 0.6, glints: 0.25, grainStrength: 0.35 },
 }
 
 export const DEFAULT_RECIPE: Recipe = FINISHES.brushed
@@ -102,7 +103,7 @@ export type Surface = {
   sweep: string
 }
 
-const num = (x: number): number => Number(x.toFixed(3))
+const num = (x: number): number => Math.round(x * 1000 + 1e-9) / 1000
 
 const css = (c: Oklab, alpha?: number): string => {
   const [r, g, b] = oklabToRgb(c)
@@ -154,7 +155,7 @@ export function metallicSurface(
   const tile = (size: number) => `${size}px ${size}px`
 
   if (r.glints > 0) add(glints(r.glints), tile(TEMPLATES.glints.size), "screen")
-  if (r.scratches > 0) add(scratches(r.scratches), tile(TEMPLATES.scratches.size), "overlay")
+  if (r.scratches > 0) add(scratches(r.scratches, r.bandAngle - 90), tile(TEMPLATES.scratches.size), "overlay")
   if (r.grain === "brushed") add(brushed(r.bandAngle - 90, r.grainStrength), tile(TEMPLATES.brushed.size), r.grainBlend)
   if (r.grain === "flake") add(flake(), tile(TEMPLATES.flake.size), r.grainBlend)
   if (hot > 0) {

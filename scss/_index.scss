@@ -9,21 +9,21 @@ $body-angle: 120deg !default;
 $body: (0% -0.5, 35% -0.7, 65% -0.95, 100% -1) !default;
 $band-angle: 120deg !default;
 $band: (0% -0.5, 15% -0.2, 25% 0.2, 32% 0.7, 36% 1, 40% 0.75, 50% 0.35, 65% 0.05, 70% 0.05, 85% -0.2, 100% -0.5) !default;
-$band-alpha: 0.55 !default;
+$band-alpha: 0.8 !default;
 $cross-angle: 60deg !default;
 $cross: (0% -1, 10% -0.7, 25% -0.2, 40% -1, 60% -0.2, 70% -0.9, 90% -0.6, 100% -1) !default;
-$cross-alpha: 0.5 !default;
-$hot: 0.35 !default;
+$cross-alpha: 0.7 !default;
+$hot: 0.05 !default;
 $hot-width: 2% !default;
 $gloss: 1 !default;
 $grain: brushed !default;
-$grain-strength: 0.85 !default;
+$grain-strength: 0.2 !default;
 $grain-blend: overlay !default;
 $glints: 0.35 !default;
 $scratches: 0 !default;
-$flop-drop: 0.4 !default;
+$flop-drop: 0.25 !default;
 $flop-chroma: 0.9 !default;
-$sweep-alpha: 0.55 !default;
+$sweep-alpha: 0.65 !default;
 $sweep-angle: 112deg !default;
 $sweep-duration: 0.55s !default;
 $sweep-easing: cubic-bezier(0.22, 0.61, 0.36, 1) !default;
@@ -36,12 +36,13 @@ $bevel:
 
 $finishes: (
   brushed: (),
-  polished: (grain: none, glints: 0.2, hot: 0.45, flop-drop: 0.36),
-  flake: (grain: flake, grain-strength: 1, grain-blend: soft-light, glints: 0.6, hot: 0.3),
+  polished: (grain: none, glints: 0.2, hot: 0.3, flop-drop: 0.3),
+  flake: (grain: flake, grain-strength: 1, grain-blend: soft-light, glints: 0.6, hot: 0.15),
   satin: (
     body: (0% 0.15, 35% 0, 65% -0.35, 100% -0.6),
     band: (0% -0.35, 15% -0.05, 25% 0.25, 35% 1, 40% 0.7, 50% 0.3, 65% 0, 70% 0, 85% -0.2, 100% -0.35),
     band-alpha: 0.55,
+    cross-angle: 60deg,
     cross: (0% -0.6, 10% -0.4, 25% 0.05, 40% -0.6, 60% 0.05, 70% -0.5, 90% -0.4, 100% -0.6),
     cross-alpha: 0.35,
     hot: 0,
@@ -53,8 +54,8 @@ $finishes: (
     flop-drop: 0.1,
     flop-chroma: 0.85,
   ),
-  matte: (gloss: 0.2, grain: flake, grain-strength: 1, grain-blend: soft-light, glints: 0.15, cross-alpha: 0.35, flop-drop: 0.25),
-  worn: (gloss: 0.7, scratches: 0.7, glints: 0.25, grain-strength: 0.7),
+  matte: (gloss: 0.2, grain: flake, grain-strength: 1, grain-blend: soft-light, glints: 0.15, cross-alpha: 0.45, flop-drop: 0.2),
+  worn: (gloss: 0.75, scratches: 0.6, glints: 0.25, grain-strength: 0.35),
 ) !default;
 
 @function settings($finish: null) {
@@ -152,7 +153,7 @@ $finishes: (
     $blends: list.append($blends, screen, comma);
   }
   @if map.get($s, scratches) > 0 {
-    $images: list.append($images, textures.scratches(map.get($s, scratches)), comma);
+    $images: list.append($images, textures.scratches(map.get($s, scratches), map.get($s, band-angle) - 90deg), comma);
     $sizes: list.append($sizes, textures.$scratch-size textures.$scratch-size, comma);
     $blends: list.append($blends, overlay, comma);
   }
