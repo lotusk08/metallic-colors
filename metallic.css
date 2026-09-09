@@ -1,56 +1,40 @@
-/*
- * metallic-colors — the surface class.
- *
- * Pair with metallicSurface() / metallicStyle(): the element's `background`
- * is the four layers (flake, specular band, crossing band, body), and this
- * sheet supplies what a background alone cannot — the flake blended
- * soft-light so it grains the colour rather than greying it, the bevel, and
- * the sweep of light that crosses the swatch on hover, in the tone's own
- * sheen (`--metallic-sheen`).
- */
+@charset "UTF-8";
+/*! metallic-colors — the surface class. Pair with metallicSurface() /
+ *  metallicStyle() (JavaScript) or the surface mixin (Sass): the element's
+ *  background is the four layers (flake, specular band, crossing band,
+ *  body); this sheet supplies the flake blended soft-light so it grains the
+ *  colour rather than greying it, the bevel, and the sweep of light that
+ *  crosses the swatch on hover in the tone's own sheen (--metallic-sheen).
+ *  Generated from scss/metallic.scss — edit there, then npm run build:css. */
 .metallic {
   position: relative;
   overflow: hidden;
   background-size: 90px 90px, auto, auto, auto;
   background-blend-mode: soft-light, normal, normal, normal;
-  box-shadow:
-    0 0 1px 0 rgba(0, 0, 0, 0.9),
-    1px 2px 1px 0 rgba(255, 255, 255, 0.3) inset,
-    3px 5px 2px -2px rgba(255, 255, 255, 0.1) inset,
-    1px 3px 0 1px rgba(0, 0, 0, 0.3),
-    3px 6px 2px -2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.9), 1px 2px 1px 0 rgba(255, 255, 255, 0.3) inset, 3px 5px 2px -2px rgba(255, 255, 255, 0.1) inset, 1px 3px 0 1px rgba(0, 0, 0, 0.3), 3px 6px 2px -2px rgba(0, 0, 0, 0.2);
 }
-
-/* No bevel: a fill rather than a chip. */
-.metallic.metallic-flat {
-  box-shadow: none;
-}
-
 .metallic::after {
   content: "";
   position: absolute;
   inset: -30%;
   pointer-events: none;
-  background: linear-gradient(
-    112deg,
-    rgba(255, 255, 255, 0) 42%,
-    var(--metallic-sheen, rgba(255, 255, 255, 0.42)) 50%,
-    rgba(255, 255, 255, 0) 58%
-  );
+  background: linear-gradient(112deg, rgba(255, 255, 255, 0) 42%, var(--metallic-sheen, rgba(255, 255, 255, 0.42)) 50%, rgba(255, 255, 255, 0) 58%);
   transform: translateX(-34%);
   transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-
-/* The sweep: on hover, on a hovered ancestor marked .metallic-trigger (a
-   button wrapping the swatch), or forced with .is-lit. */
-.metallic:hover::after,
-.metallic-trigger:hover .metallic::after,
-.metallic.is-lit::after {
+.metallic:hover::after, .metallic.is-lit::after {
   transform: translateX(34%);
 }
-
 @media (prefers-reduced-motion: reduce) {
   .metallic::after {
     transition: none;
   }
+}
+
+.metallic.metallic-flat {
+  box-shadow: none;
+}
+
+.metallic-trigger:hover .metallic::after {
+  transform: translateX(34%);
 }

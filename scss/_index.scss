@@ -1,0 +1,186 @@
+// metallic-colors — the recipe in Sass alone, no JavaScript.
+//
+//   @use "metallic-colors/scss" as metallic;
+//
+//   .gold {
+//     @include metallic.base;                        // once per element — or emit the .metallic class: @use "metallic-colors/scss/metallic"
+//     @include metallic.surface(#ec9d00, #fffd89, $mid: #ffeb5e);
+//   }
+//
+// Every setting is a `!default` you can override at `@use` time:
+//
+//   @use "metallic-colors/scss" with ($band-angle: 135deg, $band-alpha: .7);
+//
+// Mixing happens in oklab through `color.mix($method: oklab)`, so this
+// module needs Dart Sass 1.79 or newer.
+
+@use "sass:color";
+@use "sass:list";
+@use "sass:math";
+
+// ── Settings ─────────────────────────────────────────────────────────────
+
+// Ladders: lists of `<stop> <p>` pairs. `p` places the rung between the
+// readings — −1 the flop, 0 the face, 0.5 the mid, 1 the sheen.
+
+// The opaque body: the face, falling toward the flop.
+$body-angle: 120deg !default;
+$body: (0% 0.15, 35% 0, 65% -0.35, 100% -0.6) !default;
+
+// The specular band: rises through the mid reading to the sheen and falls away.
+$band-angle: 120deg !default;
+$band: (0% -0.35, 15% -0.05, 25% 0.25, 35% 1, 40% 0.7, 50% 0.3, 65% 0, 70% 0, 85% -0.2, 100% -0.35) !default;
+$band-alpha: 0.55 !default;
+
+// A fainter band crossing the first — where they meet they interfere, and
+// that interference is what the eye takes for brushed metal.
+$cross-angle: 60deg !default;
+$cross: (0% -0.6, 10% -0.4, 25% 0.05, 40% -0.6, 60% 0.05, 70% -0.5, 90% -0.4, 100% -0.6) !default;
+$cross-alpha: 0.35 !default;
+
+// The flake: fractal noise, tiled 90px, blended soft-light by `base`. Set
+// to `none` for no grain (a `with` block cannot pass null past a !default).
+$flake: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='90'%20height='90'%3E%3Cfilter%20id='k'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='1'%20seed='7'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='matrix'%20values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%201%200%200%200%20-0.74'/%3E%3CfeComponentTransfer%3E%3CfeFuncA%20type='linear'%20slope='3'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='90'%20height='90'%20filter='url%28%23k%29'/%3E%3C/svg%3E") !default;
+$flake-size: 90px 90px !default;
+
+// A derived flop sits this far below the face in oklab lightness (0–1)
+// and keeps this much of its chroma.
+$flop-drop: 0.1 !default;
+$flop-chroma: 0.85 !default;
+
+// The hover sweep: the sheen at this opacity, its angle, and its timing.
+$sweep-alpha: 0.55 !default;
+$sweep-angle: 112deg !default;
+$sweep-duration: 0.55s !default;
+$sweep-easing: cubic-bezier(0.22, 0.61, 0.36, 1) !default;
+
+// The bevel.
+$bevel:
+  0 0 1px 0 rgba(0, 0, 0, 0.9),
+  1px 2px 1px 0 rgba(255, 255, 255, 0.3) inset,
+  3px 5px 2px -2px rgba(255, 255, 255, 0.1) inset,
+  1px 3px 0 1px rgba(0, 0, 0, 0.3),
+  3px 6px 2px -2px rgba(0, 0, 0, 0.2) !default;
+
+// ── Colour maths ─────────────────────────────────────────────────────────
+
+/// A colour as `rgb()` / `rgba()`, channels rounded, clipped to the gamut
+/// the way a browser would clip it.
+@function to-rgb($c, $alpha: null) {
+  $c: color.to-space(color.to-gamut($c, $space: rgb, $method: clip), rgb);
+  $r: math.round(color.channel($c, "red"));
+  $g: math.round(color.channel($c, "green"));
+  $b: math.round(color.channel($c, "blue"));
+  @if $alpha == null {
+    @return rgb($r, $g, $b);
+  }
+  @return rgba($r, $g, $b, $alpha);
+}
+
+/// Mix in oklab: `$t` of the way from `$from` to `$to`.
+@function mix($from, $to, $t) {
+  @return color.mix($to, $from, math.clamp(0, $t, 1) * 100%, $method: oklab);
+}
+
+/// The flop derived from a face: a step darker and greyer.
+@function derive-flop($face) {
+  $l: color.channel($face, "lightness", $space: oklab);
+  @return color.change(
+    $face,
+    $lightness: $l - $flop-drop * 100%,
+    $a: color.channel($face, "a", $space: oklab) * $flop-chroma,
+    $b: color.channel($face, "b", $space: oklab) * $flop-chroma,
+    $space: oklab
+  );
+}
+
+/// The colour at ladder position `$p` for a tone.
+@function at($p, $face, $mid, $sheen, $flop) {
+  @if $p < 0 {
+    @return mix($face, $flop, -$p);
+  } @else if $p <= 0.5 {
+    @return mix($face, $mid, $p * 2);
+  }
+  @return mix($mid, $sheen, ($p - 0.5) * 2);
+}
+
+/// One ladder as gradient stops.
+@function ladder($rows, $alpha, $face, $mid, $sheen, $flop) {
+  $stops: ();
+  @each $row in $rows {
+    $stop: list.nth($row, 1);
+    $p: list.nth($row, 2);
+    $stops: list.append($stops, to-rgb(at($p, $face, $mid, $sheen, $flop), $alpha) $stop, $separator: comma);
+  }
+  @return $stops;
+}
+
+/// The whole `background` value for a tone.
+@function surface-background($face, $sheen, $mid: null, $flop: null) {
+  @if $mid == null {
+    $mid: mix($face, $sheen, 0.5);
+  }
+  @if $flop == null {
+    $flop: derive-flop($face);
+  }
+  $layers: (
+    linear-gradient($band-angle, ladder($band, $band-alpha, $face, $mid, $sheen, $flop)),
+    linear-gradient($cross-angle, ladder($cross, $cross-alpha, $face, $mid, $sheen, $flop)),
+    linear-gradient($body-angle, ladder($body, null, $face, $mid, $sheen, $flop))
+  );
+  @if $flake != none and $flake != null {
+    $layers: list.join(($flake,), $layers, $separator: comma);
+  }
+  @return $layers;
+}
+
+/// The sweep colour for a tone: its sheen, half-transparent.
+@function surface-sweep($sheen) {
+  @return to-rgb($sheen, $sweep-alpha);
+}
+
+// ── Mixins ───────────────────────────────────────────────────────────────
+
+/// The surface of one tone: its background and the sweep colour.
+@mixin surface($face, $sheen, $mid: null, $flop: null) {
+  background: surface-background($face, $sheen, $mid, $flop);
+  --metallic-sheen: #{surface-sweep($sheen)};
+}
+
+/// What every metallic element needs once: the flake blend, the bevel and
+/// the sweep. `metallic.scss` emits this as the `.metallic` class.
+@mixin base($bevel: $bevel) {
+  position: relative;
+  overflow: hidden;
+  @if $flake != none and $flake != null {
+    background-size: $flake-size, auto, auto, auto;
+    background-blend-mode: soft-light, normal, normal, normal;
+  }
+  box-shadow: $bevel;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    pointer-events: none;
+    background: linear-gradient(
+      $sweep-angle,
+      rgba(255, 255, 255, 0) 42%,
+      var(--metallic-sheen, rgba(255, 255, 255, 0.42)) 50%,
+      rgba(255, 255, 255, 0) 58%
+    );
+    transform: translateX(-34%);
+    transition: transform $sweep-duration $sweep-easing;
+  }
+
+  &:hover::after,
+  &.is-lit::after {
+    transform: translateX(34%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+}

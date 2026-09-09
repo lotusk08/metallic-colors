@@ -1,13 +1,16 @@
 # metallic-colors
 
-Metallic paint swatches in CSS — layered gradients calibrated from photographed readings of the real surface.
+Metallic paint swatches in CSS or Sass — layered gradients calibrated from photographed readings of the real surface.
+
+**[Live demo](https://lotusk08.github.io/metallic-colors/)**
 
 A metallic has no one colour. Turn a painted sample in the light and it runs from a dark flop, through the colour it shows face-on, to the bright specular of the flake itself: a gold that flashes lemon, a blue that flashes cyan, a pearl that goes almost white. A flat hex cannot say that, and a lighter copy of the face is not what the flake does. This package treats a tone as a set of **readings** of one surface at different angles and lays them out as light would — an opaque body, a specular band that peaks in the tone's real sheen, and a fainter band crossing it so the two interfere the way brushed metal does.
 
 - Zero dependencies. TypeScript, ESM, ~3 KB.
 - Works anywhere CSS does: a `background` value plus one small stylesheet.
+- A Sass-only version of the same recipe — mixins and `!default` settings, no JavaScript.
 - Optional React wrapper.
-- Twenty-four calibrated tones included, and the scripts to calibrate your own.
+- Forty calibrated tones included — a photographed paint deck and the classic metals — and the scripts to calibrate your own.
 
 ## Install
 
@@ -58,13 +61,55 @@ import { Metallic } from "metallic-colors/react"
 
 ### Presets
 
-Twenty-four metallic wall-paint tones, each read three times from a printed colour card (face-on, part-turned, into the light).
-
 ```js
-import { NHU_DECK, presetByCode } from "metallic-colors/presets"
+import { PAINT_DECK, CLASSIC_METALS, PRESETS, presetByCode } from "metallic-colors/presets"
 
-presetByCode("M17") // { code: "M17", name: "Nhũ vàng", face: "#ec9d00", mid: "#ffeb5e", sheen: "#fffd89" }
+presetByCode("M17")       // { code: "M17", name: "Gold", localName: "Nhũ vàng", face: "#ec9d00", mid: "#ffeb5e", sheen: "#fffd89" }
+presetByCode("rose-gold") // { code: "rose-gold", name: "Rose Gold", face: "#c98a7e", mid: "#e8b8ad", sheen: "#ffe9e3" }
 ```
+
+- `PAINT_DECK` — twenty-four metallic wall-paint tones, each read three times from a printed colour card (face-on, part-turned, into the light). English names describe the tone; `localName` is the name as printed on the card.
+- `CLASSIC_METALS` — sixteen familiar metals (silver, chrome, platinum, aluminium, titanium, pewter, gunmetal, graphite, white gold, champagne, yellow gold, brass, rose gold, copper, bronze, steel blue), authored rather than photographed. Use them as they are, or as starting points.
+- `PRESETS` — both, and `presetByCode` looks a tone up by code, case-insensitively.
+
+### Sass
+
+The same recipe in Sass alone, for a project with no JavaScript in its styling. Mixing happens in oklab through `color.mix($method: oklab)`, so it needs Dart Sass 1.79 or newer.
+
+```scss
+@use "metallic-colors/scss/metallic";            // emits the .metallic class
+@use "metallic-colors/scss" as metallic;         // the mixins and settings
+
+.gold {
+  @include metallic.surface(#ec9d00, #fffd89, $mid: #ffeb5e);
+}
+```
+
+`surface($face, $sheen, $mid: null, $flop: null)` writes the `background` and `--metallic-sheen`; the element still needs the `metallic` class, or `@include metallic.base` on its own selector. `surface-background(...)` and `surface-sweep(...)` return the values if you would rather place them yourself.
+
+Every setting is a `!default`, overridable at `@use` time:
+
+```scss
+@use "metallic-colors/scss" as metallic with (
+  $band-angle: 135deg,   // where the light comes from
+  $band-alpha: 0.7,      // a harder, brighter flash
+  $cross-alpha: 0.2,     // a calmer surface
+  $flop-drop: 0.16,      // a deeper flop for a coarse flake
+  $flake: none,          // no grain
+);
+```
+
+| Setting | Default | What it is |
+| --- | --- | --- |
+| `$body-angle`, `$body` | `120deg`, 4 stops | The opaque body: the face, falling toward the flop. |
+| `$band-angle`, `$band`, `$band-alpha` | `120deg`, 10 stops, `0.55` | The specular band, peaking in the sheen at 35%. |
+| `$cross-angle`, `$cross`, `$cross-alpha` | `60deg`, 8 stops, `0.35` | The fainter crossing band. |
+| `$flake`, `$flake-size` | fractal-noise SVG, `90px 90px` | The grain; `none` for no grain. |
+| `$flop-drop`, `$flop-chroma` | `0.1`, `0.85` | How a derived flop sits below the face (oklab L) and how much chroma it keeps. |
+| `$sweep-alpha`, `$sweep-angle`, `$sweep-duration`, `$sweep-easing` | `0.55`, `112deg`, `0.55s`, cubic-bezier | The hover sweep. |
+| `$bevel` | five shadows | The chip's edge; `none` for a flat fill. |
+
+Ladders are lists of `<stop> <p>` pairs, where `p` places each rung between the readings (−1 flop, 0 face, 0.5 mid, 1 sheen). The Sass and JavaScript versions produce identical colours; the test suite holds them to a channel step of each other, and `metallic.css` is the compiled Sass entry.
 
 ### The sweep
 
@@ -121,7 +166,8 @@ import {
 | `DEFAULT_RECIPE` | The ladders, angles, alphas, flake and derivation constants. Pass a partial `Recipe` to override any of them. |
 | `FLAKE` | The fractal-noise flake as a CSS `<image>`. |
 | `Metallic` (`metallic-colors/react`) | A component: `tone`, `recipe?`, `as?`, plus any element props. |
-| `NHU_DECK`, `presetByCode` (`metallic-colors/presets`) | The calibrated tones. |
+| `PAINT_DECK`, `CLASSIC_METALS`, `PRESETS`, `presetByCode` (`metallic-colors/presets`) | The calibrated tones. |
+| `metallic-colors/scss`, `metallic-colors/scss/metallic` | The Sass module (mixins and settings) and the Sass entry that emits `.metallic`. |
 | `hexToOklab`, `oklabToHex`, `oklabToRgb`, `mixOklab` | The colour maths, if you want it. |
 
 ### Tuning a recipe
@@ -147,8 +193,10 @@ Anything that supports `background-blend-mode` and CSS custom properties — eve
 ```bash
 npm install
 npm test          # node --test, runs the TypeScript sources directly (Node 22.18+)
-npm run build     # tsc → dist/
-npm run demo      # build, then serve; open http://localhost:4173/demo/
+npm run build       # tsc → dist/
+npm run build:css   # scss/metallic.scss → metallic.css
+npm run build:site  # the demo as a static site, in site/ (what GitHub Pages deploys)
+npm run demo        # build, then serve; open http://localhost:4173/demo/
 ```
 
 ## License

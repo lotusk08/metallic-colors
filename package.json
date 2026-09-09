@@ -1,7 +1,7 @@
 {
   "name": "metallic-colors",
-  "version": "0.1.0",
-  "description": "Metallic paint swatches in CSS: layered gradients calibrated from three photographed readings of the real surface.",
+  "version": "0.2.0",
+  "description": "Metallic paint swatches in CSS or Sass: layered gradients calibrated from photographed readings of the real surface.",
   "license": "MIT",
   "author": "Steve Hoang (https://stevehoang.com)",
   "homepage": "https://github.com/lotusk08/metallic-colors#readme",
@@ -22,7 +22,12 @@
     "css",
     "gradient",
     "oklab",
-    "react"
+    "react",
+    "scss",
+    "sass",
+    "mixin",
+    "swatches",
+    "palette"
   ],
   "type": "module",
   "sideEffects": [
@@ -42,11 +47,21 @@
       "import": "./dist/presets.js"
     },
     "./metallic.css": "./metallic.css",
+    "./scss": {
+      "sass": "./scss/_index.scss",
+      "default": "./scss/_index.scss"
+    },
+    "./scss/metallic": {
+      "sass": "./scss/metallic.scss",
+      "default": "./scss/metallic.scss"
+    },
+    "./scss/*": "./scss/*",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "metallic.css",
+    "scss",
     "scripts",
     "README.md",
     "LICENSE"
@@ -55,7 +70,9 @@
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build",
     "test": "node --test \"test/**/*.test.ts\"",
-    "demo": "npm run build && npx --yes serve -l 4173 ."
+    "demo": "npm run build && npx --yes serve -l 4173 .",
+    "build:css": "sass --no-source-map scss/metallic.scss metallic.css",
+    "build:site": "node scripts/build-site.mjs"
   },
   "peerDependencies": {
     "react": ">=17"
@@ -68,6 +85,7 @@
   "devDependencies": {
     "@types/node": "^24.13.3",
     "@types/react": "^19.1.0",
+    "sass": "^1.104.0",
     "typescript": "^5.9.0"
   },
   "engines": {

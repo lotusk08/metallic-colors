@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 
 import { DEFAULT_RECIPE, metallicStyle, metallicSurface, readings } from "../src/surface.ts"
-import { NHU_DECK, presetByCode } from "../src/presets.ts"
+import { CLASSIC_METALS, PAINT_DECK, PRESETS, presetByCode } from "../src/presets.ts"
 
 const gold = { face: "#ec9d00", mid: "#ffeb5e", sheen: "#fffd89" }
 
@@ -53,13 +53,20 @@ test("a bad hex is refused, not rendered black", () => {
   assert.throws(() => metallicSurface({ face: "gold", sheen: "#fffd89" }), /hex/)
 })
 
-test("the preset deck: 24 tones, three readings each, found by code", () => {
-  assert.equal(NHU_DECK.length, 24)
-  for (const t of NHU_DECK) {
+test("the presets: a photographed deck of 24, sixteen classic metals, unique codes", () => {
+  assert.equal(PAINT_DECK.length, 24)
+  assert.equal(CLASSIC_METALS.length, 16)
+  assert.equal(PRESETS.length, 40)
+  assert.equal(new Set(PRESETS.map((t) => t.code.toLowerCase())).size, PRESETS.length)
+  for (const t of PRESETS) {
     for (const k of ["face", "mid", "sheen"] as const) {
       assert.match(t[k]!, /^#[0-9a-f]{6}$/, `${t.code} ${k}`)
     }
+    assert.ok(t.name.length > 0, `${t.code} name`)
   }
-  assert.equal(presetByCode("m17")?.name, "Nhũ vàng")
+  for (const t of PAINT_DECK) assert.ok(t.localName, `${t.code} localName`)
+  assert.equal(presetByCode("m17")?.name, "Gold")
+  assert.equal(presetByCode("M17")?.localName, "Nhũ vàng")
+  assert.equal(presetByCode("Rose-Gold")?.name, "Rose Gold")
   assert.equal(presetByCode("M99"), undefined)
 })
