@@ -1,6 +1,6 @@
 {
   "name": "metallic-colors",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Metallic paint swatches in CSS or Sass: layered gradients calibrated from photographed readings of the real surface.",
   "license": "MIT",
   "author": "Steve Hoang (https://stevehoang.com)",
@@ -64,6 +64,7 @@
     "scss",
     "scripts",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {

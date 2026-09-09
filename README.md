@@ -1,8 +1,12 @@
 # metallic-colors
 
+[![npm](https://img.shields.io/npm/v/metallic-colors.svg)](https://www.npmjs.com/package/metallic-colors)
+[![test](https://github.com/lotusk08/metallic-colors/actions/workflows/test.yml/badge.svg)](https://github.com/lotusk08/metallic-colors/actions/workflows/test.yml)
+[![license](https://img.shields.io/npm/l/metallic-colors.svg)](./LICENSE)
+
 Metallic surfaces in CSS or Sass — layered gradients and procedural textures, calibrated from photographed readings of the real thing.
 
-**[Live demo](https://lotusk08.github.io/metallic-colors/)**
+**[Live demo](https://lotusk08.github.io/metallic-colors/)** · [npm](https://www.npmjs.com/package/metallic-colors) · [Changelog](./CHANGELOG.md)
 
 A metallic has no one colour. Turn a painted sample in the light and it runs from a dark flop, through the colour it shows face-on, to the bright specular of the flake itself: a gold that flashes lemon, a blue that flashes cyan, a pearl that goes almost white. A flat hex cannot say that, and a lighter copy of the face is not what the flake does. This package treats a tone as a set of **readings** of one surface at different angles and lays them out as light would — a dark body, a specular band that peaks in the tone's real sheen with a hot line on its crest, a fainter band crossing it so the two interfere the way brushed metal does, and a coating on top: brushed grain or flake, glints, scratches, from mirror-bright to matte.
 
@@ -18,7 +22,7 @@ A metallic has no one colour. Turn a painted sample in the light and it runs fro
 npm install metallic-colors
 ```
 
-Or straight from GitHub (it builds on install):
+Node 22.18 or newer to run the tests from source; any bundler or browser with ES modules to use the package. For the development version straight from GitHub (it builds on install):
 
 ```bash
 npm install github:lotusk08/metallic-colors
