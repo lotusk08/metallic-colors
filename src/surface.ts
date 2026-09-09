@@ -1,4 +1,5 @@
 import { hexToOklab, mixOklab, oklabToRgb, type Oklab } from "./oklab.ts"
+import { TEMPLATES, brushed, flake, glints, scratches } from "./textures.ts"
 
 export type Tone = {
   face: string
@@ -9,6 +10,8 @@ export type Tone = {
 
 export type Ladder = [stop: number, p: number][]
 
+export type Grain = "brushed" | "flake" | "none"
+
 export type Recipe = {
   bodyAngle: number
   body: Ladder
@@ -18,41 +21,88 @@ export type Recipe = {
   crossAngle: number
   cross: Ladder
   crossAlpha: number
-  flake: string | null
+  hot: number
+  hotWidth: number
+  gloss: number
+  grain: Grain
+  grainStrength: number
+  grainBlend: string
+  glints: number
+  scratches: number
   flopDrop: number
   flopChroma: number
   sweepAlpha: number
 }
 
-export const FLAKE =
-  "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='90'%20height='90'%3E%3Cfilter%20id='k'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='1'%20seed='7'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='matrix'%20values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%201%200%200%200%20-0.74'/%3E%3CfeComponentTransfer%3E%3CfeFuncA%20type='linear'%20slope='3'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='90'%20height='90'%20filter='url%28%23k%29'/%3E%3C/svg%3E\")"
-
-export const DEFAULT_RECIPE: Recipe = {
+const BRUSHED: Recipe = {
   bodyAngle: 120,
-  body: [[0, 0.15], [35, 0], [65, -0.35], [100, -0.6]],
+  body: [[0, -0.5], [35, -0.7], [65, -0.95], [100, -1]],
   bandAngle: 120,
   band: [
-    [0, -0.35], [15, -0.05], [25, 0.25], [35, 1], [40, 0.7],
-    [50, 0.3], [65, 0], [70, 0], [85, -0.2], [100, -0.35],
+    [0, -0.5], [15, -0.2], [25, 0.2], [32, 0.7], [36, 1], [40, 0.75],
+    [50, 0.35], [65, 0.05], [70, 0.05], [85, -0.2], [100, -0.5],
   ],
   bandAlpha: 0.55,
   crossAngle: 60,
   cross: [
-    [0, -0.6], [10, -0.4], [25, 0.05], [40, -0.6],
-    [60, 0.05], [70, -0.5], [90, -0.4], [100, -0.6],
+    [0, -1], [10, -0.7], [25, -0.2], [40, -1],
+    [60, -0.2], [70, -0.9], [90, -0.6], [100, -1],
   ],
-  crossAlpha: 0.35,
-  flake: FLAKE,
-  flopDrop: 0.1,
-  flopChroma: 0.85,
+  crossAlpha: 0.5,
+  hot: 0.35,
+  hotWidth: 2,
+  gloss: 1,
+  grain: "brushed",
+  grainStrength: 0.85,
+  grainBlend: "overlay",
+  glints: 0.35,
+  scratches: 0,
+  flopDrop: 0.4,
+  flopChroma: 0.9,
   sweepAlpha: 0.55,
 }
+
+export const FINISHES: Record<"brushed" | "polished" | "flake" | "satin" | "matte" | "worn", Recipe> = {
+  brushed: BRUSHED,
+  polished: { ...BRUSHED, grain: "none", glints: 0.2, hot: 0.45, flopDrop: 0.36 },
+  flake: { ...BRUSHED, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.6, hot: 0.3 },
+  satin: {
+    ...BRUSHED,
+    body: [[0, 0.15], [35, 0], [65, -0.35], [100, -0.6]],
+    band: [
+      [0, -0.35], [15, -0.05], [25, 0.25], [35, 1], [40, 0.7],
+      [50, 0.3], [65, 0], [70, 0], [85, -0.2], [100, -0.35],
+    ],
+    bandAlpha: 0.55,
+    cross: [
+      [0, -0.6], [10, -0.4], [25, 0.05], [40, -0.6],
+      [60, 0.05], [70, -0.5], [90, -0.4], [100, -0.6],
+    ],
+    crossAlpha: 0.35,
+    hot: 0,
+    gloss: 0.8,
+    grain: "flake",
+    grainStrength: 1,
+    grainBlend: "soft-light",
+    glints: 0,
+    flopDrop: 0.1,
+    flopChroma: 0.85,
+  },
+  matte: { ...BRUSHED, gloss: 0.2, grain: "flake", grainStrength: 1, grainBlend: "soft-light", glints: 0.15, crossAlpha: 0.35, flopDrop: 0.25 },
+  worn: { ...BRUSHED, gloss: 0.7, scratches: 0.7, glints: 0.25, grainStrength: 0.7 },
+}
+
+export const DEFAULT_RECIPE: Recipe = FINISHES.brushed
 
 export type Surface = {
   background: string
   layers: string[]
+  backgroundSize: string
+  backgroundBlendMode: string
   sweep: string
 }
+
+const num = (x: number): number => Number(x.toFixed(3))
 
 const css = (c: Oklab, alpha?: number): string => {
   const [r, g, b] = oklabToRgb(c)
@@ -78,6 +128,10 @@ export function metallicSurface(
 ): Surface {
   const r = { ...DEFAULT_RECIPE, ...recipe }
   const { face, mid, sheen, flop } = readings(tone, r)
+  const hot = num(r.hot * r.gloss)
+  const bandAlpha = num(r.bandAlpha * (0.5 + 0.5 * r.gloss))
+  const hotWidth = num(r.hotWidth * (2 - r.gloss))
+  const sweepAlpha = num(r.sweepAlpha * (0.4 + 0.6 * r.gloss))
 
   const at = (p: number): Oklab =>
     p < 0
@@ -89,24 +143,51 @@ export function metallicSurface(
   const ladder = (rows: Ladder, alpha?: number) =>
     rows.map(([stop, p]) => `${css(at(p), alpha)} ${stop}%`).join(", ")
 
-  const layers = [
-    ...(r.flake ? [r.flake] : []),
-    `linear-gradient(${r.bandAngle}deg, ${ladder(r.band, r.bandAlpha)})`,
-    `linear-gradient(${r.crossAngle}deg, ${ladder(r.cross, r.crossAlpha)})`,
-    `linear-gradient(${r.bodyAngle}deg, ${ladder(r.body)})`,
-  ]
+  const layers: string[] = []
+  const sizes: string[] = []
+  const blends: string[] = []
+  const add = (layer: string, size = "auto", blend = "normal") => {
+    layers.push(layer)
+    sizes.push(size)
+    blends.push(blend)
+  }
+  const tile = (size: number) => `${size}px ${size}px`
+
+  if (r.glints > 0) add(glints(r.glints), tile(TEMPLATES.glints.size), "screen")
+  if (r.scratches > 0) add(scratches(r.scratches), tile(TEMPLATES.scratches.size), "overlay")
+  if (r.grain === "brushed") add(brushed(r.bandAngle - 90, r.grainStrength), tile(TEMPLATES.brushed.size), r.grainBlend)
+  if (r.grain === "flake") add(flake(), tile(TEMPLATES.flake.size), r.grainBlend)
+  if (hot > 0) {
+    const peak = r.band.reduce((best, row) => (row[1] > best[1] ? row : best), r.band[0])[0]
+    add(`linear-gradient(${r.bandAngle}deg, ${css(sheen, 0)} ${num(peak - hotWidth)}%, ${css(sheen, hot)} ${peak}%, ${css(sheen, 0)} ${num(peak + hotWidth)}%)`)
+  }
+  add(`linear-gradient(${r.bandAngle}deg, ${ladder(r.band, bandAlpha)})`)
+  add(`linear-gradient(${r.crossAngle}deg, ${ladder(r.cross, r.crossAlpha)})`)
+  add(`linear-gradient(${r.bodyAngle}deg, ${ladder(r.body)})`)
 
   return {
     background: layers.join(", "),
     layers,
-    sweep: css(sheen, r.sweepAlpha),
+    backgroundSize: sizes.join(", "),
+    backgroundBlendMode: blends.join(", "),
+    sweep: css(sheen, sweepAlpha),
   }
 }
 
 export function metallicStyle(
   tone: Tone,
   recipe: Partial<Recipe> = {}
-): { backgroundImage: string; "--metallic-sheen": string } {
+): {
+  backgroundImage: string
+  backgroundSize: string
+  backgroundBlendMode: string
+  "--metallic-sheen": string
+} {
   const s = metallicSurface(tone, recipe)
-  return { backgroundImage: s.background, "--metallic-sheen": s.sweep }
+  return {
+    backgroundImage: s.background,
+    backgroundSize: s.backgroundSize,
+    backgroundBlendMode: s.backgroundBlendMode,
+    "--metallic-sheen": s.sweep,
+  }
 }

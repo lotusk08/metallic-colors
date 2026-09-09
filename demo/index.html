@@ -54,7 +54,8 @@
   .ctl { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
   .ctl input[type=range] { width: 100%; }
   .ctl output { text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg); }
-  .ctl.check { grid-template-columns: 96px 1fr; }
+  .ctl.pick { grid-template-columns: 96px 1fr; }
+  .ctl select { height: 30px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); font: inherit; font-size: 12px; }
   .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
   .tabs button { padding: 6px 10px; border: 0; background: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); }
@@ -71,7 +72,7 @@
   .uses { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; align-items: center; }
   .use { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
   .use small { color: var(--muted); font-size: 12px; }
-  .metal-text { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 90px 90px, auto, auto, auto; background-blend-mode: soft-light, normal, normal, normal; }
+  .metal-text { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; -webkit-background-clip: text; background-clip: text; color: transparent; }
   .metal-btn { justify-self: start; padding: 12px 22px; border: 0; border-radius: 999px; font-weight: 700; color: #1a1207; cursor: pointer; }
   .metal-btn.light { color: #fff; }
   .metal-badge { justify-self: start; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #1a1207; }
@@ -136,16 +137,22 @@
       <div class="who"><b id="who-name">Gold</b><code id="who-code">M17</code></div>
       <div class="readings" id="readings"></div>
       <div>
-        <h3>Recipe</h3>
+        <h3>Coating</h3>
         <div class="controls" id="controls">
-          <label class="ctl">Band angle <input type="range" name="bandAngle" min="0" max="360" step="5" value="120"><output>120°</output></label>
-          <label class="ctl">Band alpha <input type="range" name="bandAlpha" min="0" max="1" step="0.05" value="0.55"><output>0.55</output></label>
-          <label class="ctl">Cross angle <input type="range" name="crossAngle" min="0" max="360" step="5" value="60"><output>60°</output></label>
-          <label class="ctl">Cross alpha <input type="range" name="crossAlpha" min="0" max="1" step="0.05" value="0.35"><output>0.35</output></label>
-          <label class="ctl">Flop drop <input type="range" name="flopDrop" min="0" max="0.3" step="0.01" value="0.1"><output>0.10</output></label>
-          <label class="ctl">Sweep alpha <input type="range" name="sweepAlpha" min="0" max="1" step="0.05" value="0.55"><output>0.55</output></label>
-          <label class="ctl check">Flake <input type="checkbox" name="flake" checked></label>
-          <div class="toolbar" style="margin:0"><button class="btn" type="button" id="reset">Reset recipe</button><button class="btn" type="button" id="tilt-permission" hidden>Enable tilt</button></div>
+          <label class="ctl pick">Finish <select name="finish"><option value="brushed">Brushed</option><option value="polished">Polished</option><option value="flake">Flake</option><option value="satin">Satin</option><option value="matte">Matte</option><option value="worn">Worn</option></select></label>
+          <label class="ctl">Gloss <input type="range" name="gloss" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl pick">Grain <select name="grain"><option value="brushed">Brushed</option><option value="flake">Flake</option><option value="none">None</option></select></label>
+          <label class="ctl">Grain depth <input type="range" name="grainStrength" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl">Glints <input type="range" name="glints" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl">Scratches <input type="range" name="scratches" min="0" max="1" step="0.05"><output></output></label>
+          <h3 style="margin-top:8px">Light</h3>
+          <label class="ctl">Band angle <input type="range" name="bandAngle" min="0" max="360" step="5"><output></output></label>
+          <label class="ctl">Band alpha <input type="range" name="bandAlpha" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl">Cross alpha <input type="range" name="crossAlpha" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl">Hot line <input type="range" name="hot" min="0" max="1" step="0.05"><output></output></label>
+          <label class="ctl">Flop drop <input type="range" name="flopDrop" min="0" max="0.6" step="0.01"><output></output></label>
+          <label class="ctl">Sweep alpha <input type="range" name="sweepAlpha" min="0" max="1" step="0.05"><output></output></label>
+          <div class="toolbar" style="margin:0"><button class="btn" type="button" id="reset">Reset</button><button class="btn" type="button" id="tilt-permission" hidden>Enable tilt</button></div>
         </div>
       </div>
       <div>
@@ -163,19 +170,23 @@
 </main>
 
 <script type="module">
-  import { metallicSurface, metallicStyle, readings, oklabToHex, DEFAULT_RECIPE } from "../dist/index.js"
+  import { metallicSurface, metallicStyle, readings, oklabToHex, FINISHES } from "../dist/index.js"
   import { PAINT_DECK, CLASSIC_METALS } from "../dist/presets.js"
 
   const $ = (id) => document.getElementById(id)
   const state = {
     tone: { ...PAINT_DECK.find((t) => t.code === "M17") },
-    recipe: {},
+    finish: "brushed",
+    overrides: {},
+    get recipe() { return { ...FINISHES[this.finish], ...this.overrides } },
     tab: "js",
   }
 
   const apply = (el, tone, recipe = state.recipe) => {
     const s = metallicStyle(tone, recipe)
     el.style.backgroundImage = s.backgroundImage
+    el.style.backgroundSize = s.backgroundSize
+    el.style.backgroundBlendMode = s.backgroundBlendMode
     el.style.setProperty("--metallic-sheen", s["--metallic-sheen"])
   }
   const tiles = []
@@ -241,25 +252,32 @@
     if (t.flop) o.flop = t.flop
     return o
   }
-  const recipeLiteral = () => Object.fromEntries(Object.entries(state.recipe).filter(([k, v]) => v !== DEFAULT_RECIPE[k]))
+  const recipeLiteral = () => Object.fromEntries(Object.entries(state.overrides).filter(([k, v]) => v !== FINISHES[state.finish][k]))
+  const recipeArg = () => {
+    const rec = recipeLiteral()
+    const keys = Object.keys(rec)
+    if (state.finish === "brushed" && !keys.length) return ""
+    if (!keys.length) return `FINISHES.${state.finish}`
+    return `{ ...FINISHES.${state.finish}, ${keys.map((k) => `${k}: ${JSON.stringify(rec[k])}`).join(", ")} }`
+  }
   const snippets = {
     js: () => {
-      const rec = recipeLiteral()
-      return `import "metallic-colors/metallic.css"\nimport { metallicStyle } from "metallic-colors"\n\nconst style = metallicStyle(${JSON.stringify(toneLiteral(state.tone), null, 2)}${Object.keys(rec).length ? `, ${JSON.stringify(rec, null, 2)}` : ""})`
+      const arg = recipeArg()
+      return `import "metallic-colors/metallic.css"\nimport { metallicStyle${arg ? ", FINISHES" : ""} } from "metallic-colors"\n\nconst style = metallicStyle(${JSON.stringify(toneLiteral(state.tone), null, 2)}${arg ? `, ${arg}` : ""})`
     },
     sass: () => {
       const t = state.tone
       const rec = recipeLiteral()
       const kebab = (k) => k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase())
       const withBlock = Object.keys(rec).length
-        ? ` with (\n${Object.entries(rec).map(([k, v]) => `  $${kebab(k)}: ${k.endsWith("Angle") ? v + "deg" : k === "flake" ? "none" : v},`).join("\n")}\n)`
+        ? ` with (\n${Object.entries(rec).map(([k, v]) => `  ${kebab(k)}: ${k.endsWith("Angle") ? v + "deg" : v},`).join("\n")}\n)`
         : ""
-      const args = [t.face, t.sheen, t.mid ? `$mid: ${t.mid}` : null, t.flop ? `$flop: ${t.flop}` : null].filter(Boolean).join(", ")
+      const args = [t.face, t.sheen, t.mid ? `$mid: ${t.mid}` : null, t.flop ? `$flop: ${t.flop}` : null, state.finish !== "brushed" ? `$finish: ${state.finish}` : null].filter(Boolean).join(", ")
       return `@use "metallic-colors/scss/metallic"${withBlock};\n@use "metallic-colors/scss" as metallic;\n\n.swatch {\n  @include metallic.surface(${args});\n}`
     },
     react: () => {
-      const rec = recipeLiteral()
-      return `import "metallic-colors/metallic.css"\nimport { Metallic } from "metallic-colors/react"\n\n<Metallic\n  tone={${JSON.stringify(toneLiteral(state.tone))}}${Object.keys(rec).length ? `\n  recipe={${JSON.stringify(rec)}}` : ""}\n  className="h-24 w-24 rounded-lg"\n/>`
+      const arg = recipeArg()
+      return `import "metallic-colors/metallic.css"\nimport { Metallic${arg ? ", FINISHES" : ""} } from "metallic-colors/react"\n\n<Metallic\n  tone={${JSON.stringify(toneLiteral(state.tone))}}${arg ? `\n  recipe={${arg}}` : ""}\n  className="h-24 w-24 rounded-lg"\n/>`
     },
     css: () => {
       const s = metallicSurface(state.tone, state.recipe)
@@ -280,25 +298,31 @@
   })
 
   const controls = $("controls")
+  const finishSelect = controls.querySelector("select[name=finish]")
+  const grainSelect = controls.querySelector("select[name=grain]")
+  const showFinish = () => {
+    const base = FINISHES[state.finish]
+    grainSelect.value = base.grain
+    for (const input of controls.querySelectorAll("input[type=range]")) input.value = base[input.name]
+  }
   const readControls = () => {
+    const base = FINISHES[state.finish]
     const rec = {}
-    for (const input of controls.querySelectorAll("input")) {
-      if (input.type === "checkbox") { if (!input.checked) rec.flake = null; continue }
+    if (grainSelect.value !== base.grain) rec.grain = grainSelect.value
+    for (const input of controls.querySelectorAll("input[type=range]")) {
       const v = Number(input.value)
-      if (v !== DEFAULT_RECIPE[input.name]) rec[input.name] = v
+      if (v !== base[input.name]) rec[input.name] = v
       input.nextElementSibling.value = input.name.endsWith("Angle") ? `${v}°` : v.toFixed(2)
     }
-    state.recipe = rec
+    state.overrides = rec
     render()
   }
-  controls.addEventListener("input", readControls)
-  $("reset").addEventListener("click", () => {
-    for (const input of controls.querySelectorAll("input")) {
-      if (input.type === "checkbox") input.checked = true
-      else input.value = DEFAULT_RECIPE[input.name]
-    }
+  controls.addEventListener("input", (e) => {
+    if (e.target === finishSelect) { state.finish = finishSelect.value; showFinish() }
     readControls()
   })
+  $("reset").addEventListener("click", () => { state.finish = "brushed"; finishSelect.value = "brushed"; showFinish(); readControls() })
+  showFinish()
 
   const select = (tone) => { state.tone = { ...tone }; render() }
   const render = () => { renderTiles(); renderInspector() }
@@ -368,7 +392,7 @@
     $("ground").textContent = dark ? "Light ground" : "Dark ground"
   })
 
-  render()
+  readControls()
 </script>
 </body>
 </html>

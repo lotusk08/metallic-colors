@@ -1,6 +1,6 @@
 {
   "name": "metallic-colors",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Metallic paint swatches in CSS or Sass: layered gradients calibrated from photographed readings of the real surface.",
   "license": "MIT",
   "author": "Steve Hoang (https://stevehoang.com)",
@@ -72,7 +72,8 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "demo": "npm run build && npx --yes serve -l 4173 .",
     "build:css": "sass --no-source-map scss/metallic.scss metallic.css",
-    "build:site": "node scripts/build-site.mjs"
+    "build:site": "node scripts/build-site.mjs",
+    "build:textures": "node scripts/build-textures.mjs"
   },
   "peerDependencies": {
     "react": ">=17"
