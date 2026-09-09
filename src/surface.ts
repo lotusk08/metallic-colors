@@ -1,75 +1,32 @@
 import { hexToOklab, mixOklab, oklabToRgb, type Oklab } from "./oklab.ts"
 
-/**
- * A metallic has no one colour. Turn a painted sample in the light and it
- * runs from a dark flop, through the colour it shows face-on, to the
- * bright specular of the flake itself — a gold that flashes lemon, a blue
- * that flashes cyan, a pearl that goes almost white. A tone is therefore
- * a set of READINGS of the same surface at different angles, not a single
- * hex, and the swatch is built by laying those readings out as light
- * would.
- */
 export type Tone = {
-  /** Square-on: the colour the surface shows face-on. */
   face: string
-  /** Straight into the light: the specular colour of the flake. */
   sheen: string
-  /** Part-way toward the light. Defaults to halfway between face and sheen. */
   mid?: string
-  /** Away from the light. Defaults to a step darker and greyer than the face
-   *  (see `Recipe.flopDrop` and `Recipe.flopChroma`). */
   flop?: string
 }
 
-/**
- * Gradient stops as `[position %, p]`, where `p` places the rung between
- * the readings: −1 is the flop, 0 the face, +0.5 the mid reading, +1 the
- * full sheen. A ladder describes the SHAPE of a band; the tone supplies
- * its colours, so one ladder serves every tone.
- */
 export type Ladder = [stop: number, p: number][]
 
 export type Recipe = {
-  /** The opaque body: the face, falling toward the flop. */
   bodyAngle: number
   body: Ladder
-  /** The specular band: rises through the mid reading to the sheen and falls away. */
   bandAngle: number
   band: Ladder
   bandAlpha: number
-  /** A fainter band crossing the first — where the two meet they interfere,
-   *  and that interference is what the eye takes for brushed metal. */
   crossAngle: number
   cross: Ladder
   crossAlpha: number
-  /** The flake: a CSS `<image>` tiled over everything, or null for none.
-   *  The stylesheet blends it soft-light so it grains the colour under it
-   *  rather than greying it. */
   flake: string | null
-  /** A derived flop sits this far below the face in oklab lightness… */
   flopDrop: number
-  /** …and keeps this much of its chroma. */
   flopChroma: number
-  /** Opacity of the hover sweep colour handed to the stylesheet. */
   sweepAlpha: number
 }
 
-/**
- * The flake: fractal noise in an SVG data URI, 90px tiles. Regular gradients
- * cannot do this — two of them crossed moiré into a plaid, which reads as
- * woven cloth rather than as metal.
- */
 export const FLAKE =
   "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='90'%20height='90'%3E%3Cfilter%20id='k'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='1'%20seed='7'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='matrix'%20values='0%200%200%200%201%200%200%200%200%201%200%200%200%200%201%201%200%200%200%20-0.74'/%3E%3CfeComponentTransfer%3E%3CfeFuncA%20type='linear'%20slope='3'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='90'%20height='90'%20filter='url%28%23k%29'/%3E%3C/svg%3E\")"
 
-/**
- * The default recipe. The structure is Anthony Orr's "Metallic Backgrounds"
- * (codepen.io/anthorr/pen/NrJMex): two half-transparent bands crossed at
- * 120° and 60° over an opaque body. His ladders lighten and spin one hue;
- * these place every rung on the line through the tone's own readings, so
- * the specular band peaks in the REAL sheen rather than a paler copy of
- * the face.
- */
 export const DEFAULT_RECIPE: Recipe = {
   bodyAngle: 120,
   body: [[0, 0.15], [35, 0], [65, -0.35], [100, -0.6]],
@@ -92,11 +49,8 @@ export const DEFAULT_RECIPE: Recipe = {
 }
 
 export type Surface = {
-  /** The whole `background` value: flake, band, cross, body. */
   background: string
-  /** The layers of that background, top first. */
   layers: string[]
-  /** The sheen, half-transparent, for the hover sweep (`--metallic-sheen`). */
   sweep: string
 }
 
@@ -107,7 +61,6 @@ const css = (c: Oklab, alpha?: number): string => {
     : `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-/** The four readings of a tone in oklab, the missing two derived. */
 export function readings(tone: Tone, recipe: Partial<Recipe> = {}) {
   const r = { ...DEFAULT_RECIPE, ...recipe }
   const face = hexToOklab(tone.face)
@@ -119,11 +72,6 @@ export function readings(tone: Tone, recipe: Partial<Recipe> = {}) {
   return { face, mid, sheen, flop }
 }
 
-/**
- * Build the swatch. Returns the CSS `background` and the sweep colour; pair
- * it with `metallic.css` (or your own rules for the flake blend, the bevel
- * and the sweep).
- */
 export function metallicSurface(
   tone: Tone,
   recipe: Partial<Recipe> = {}
@@ -155,15 +103,10 @@ export function metallicSurface(
   }
 }
 
-/**
- * The same, as an inline-style object: `background` plus the custom
- * property `metallic.css` reads for the sweep. Spread it onto any element
- * that carries the `metallic` class.
- */
 export function metallicStyle(
   tone: Tone,
   recipe: Partial<Recipe> = {}
-): { background: string; "--metallic-sheen": string } {
+): { backgroundImage: string; "--metallic-sheen": string } {
   const s = metallicSurface(tone, recipe)
-  return { background: s.background, "--metallic-sheen": s.sweep }
+  return { backgroundImage: s.background, "--metallic-sheen": s.sweep }
 }

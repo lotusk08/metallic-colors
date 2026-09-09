@@ -1,22 +1,4 @@
 #!/usr/bin/env node
-/**
- * Read a grid of printed swatches off a photograph.
- *
- *   node scripts/sample-card.mjs <photo> <out.json> <cols> <rows> "<corners>" "<codes>"
- *
- *   corners  centres of the four CORNER swatches in photo pixels, in the
- *            order top-left, top-right, bottom-right, bottom-left of the
- *            grid as you want it read:  "748,788 2480,820 2468,2820 752,2808"
- *   codes    one code per swatch, row-major, comma-separated
- *
- * The page is perspective-rectified through those four points (ImageMagick
- * `magick` must be on PATH), then each swatch is sampled from a box around
- * its centre, with the darkest and brightest fifth of the pixels dropped so
- * a label or a glint does not skew it. The paper around each swatch is read
- * too, so the readings can later be normalised to the card's own white.
- *
- * Needs `sharp` (npm i sharp) for pixel access.
- */
 import { execFileSync } from "node:child_process"
 import fs from "node:fs"
 
@@ -34,7 +16,6 @@ const codes = codesS.split(",").map((s) => s.trim())
 if (corners.length !== 4) throw new Error("four corners, please")
 if (codes.length !== cols * rows) throw new Error(`need ${cols * rows} codes, got ${codes.length}`)
 
-// Rectify so that swatch centres land on a P-pitch grid with an M margin.
 const P = 300
 const M = 220
 const W = (cols - 1) * P + 2 * M
@@ -50,7 +31,6 @@ execFileSync("magick", [
 const { data, info } = await sharp(rect).raw().toBuffer({ resolveWithObject: true })
 const ch = info.channels
 
-/** Mean of the middle 60% of the pixels in a box, by luminance. */
 const robust = (cx, cy, r) => {
   const px = []
   for (let y = Math.max(0, cy - r); y < Math.min(info.height, cy + r); y++)
@@ -73,8 +53,6 @@ for (let r = 0; r < rows; r++)
     const cx = M + c * P
     const cy = M + r * P
     const rgb = robust(cx, cy, Math.round(P * 0.22))
-    // Paper: the gaps toward neighbouring swatches, brightest half averaged
-    // (a shadowed gap reads grey).
     const gaps = []
     if (c > 0) gaps.push(robust(cx - P / 2, cy, 12))
     if (c < cols - 1) gaps.push(robust(cx + P / 2, cy, 12))

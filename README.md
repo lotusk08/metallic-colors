@@ -42,7 +42,7 @@ const el = document.querySelector(".swatch")
 const s = metallicSurface(gold)
 
 el.classList.add("metallic")
-el.style.background = s.background
+el.style.backgroundImage = s.background
 el.style.setProperty("--metallic-sheen", s.sweep)
 ```
 
@@ -87,7 +87,7 @@ The same recipe in Sass alone, for a project with no JavaScript in its styling. 
 
 With a bundler, point Sass at `node_modules` (`loadPaths`) or use the `pkg:` importer: `@use "pkg:metallic-colors/scss"`.
 
-`surface($face, $sheen, $mid: null, $flop: null)` writes the `background` and `--metallic-sheen`; the element still needs the `metallic` class, or `@include metallic.base` on its own selector. `surface-background(...)` and `surface-sweep(...)` return the values if you would rather place them yourself.
+`surface($face, $sheen, $mid: null, $flop: null)` writes the `background-image` and `--metallic-sheen`; the element still needs the `metallic` class, or `@include metallic.base` on its own selector. `surface-background(...)` and `surface-sweep(...)` return the values if you would rather place them yourself.
 
 Every setting is a `!default`, overridable at `@use` time. Sass configures a module only on its first load, so put the `with` block on whichever of the two you load first — the class entry forwards the settings:
 
@@ -163,8 +163,8 @@ import {
 
 | Export | What it does |
 | --- | --- |
-| `metallicSurface(tone, recipe?)` | `{ background, layers, sweep }` — the CSS `background` value (and its layers, top first) and the sheen for the sweep. |
-| `metallicStyle(tone, recipe?)` | `{ background, "--metallic-sheen" }` — the same as an inline-style object. |
+| `metallicSurface(tone, recipe?)` | `{ background, layers, sweep }` — the `background-image` value (and its layers, top first) and the sheen for the sweep. |
+| `metallicStyle(tone, recipe?)` | `{ backgroundImage, "--metallic-sheen" }` — the same as an inline-style object. |
 | `readings(tone, recipe?)` | The four readings in oklab, the missing ones derived. |
 | `DEFAULT_RECIPE` | The ladders, angles, alphas, flake and derivation constants. Pass a partial `Recipe` to override any of them. |
 | `FLAKE` | The fractal-noise flake as a CSS `<image>`. |

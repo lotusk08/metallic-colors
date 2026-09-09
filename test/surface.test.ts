@@ -16,7 +16,6 @@ test("a surface is the flake over three gradients", () => {
 
 test("the specular band peaks in the tone's real sheen, and the sweep is that sheen", () => {
   const s = metallicSurface(gold)
-  // #fffd89 — lemon, not a paler orange.
   assert.equal(s.sweep, "rgba(255, 253, 137, 0.55)")
   assert.ok(s.layers[1].includes("rgba(255, 253, 137, 0.55) 35%"))
 })
@@ -45,7 +44,7 @@ test("a recipe can drop the flake and turn the bands", () => {
 
 test("a style object carries the background and the sweep variable", () => {
   const style = metallicStyle(gold)
-  assert.equal(style.background, metallicSurface(gold).background)
+  assert.equal(style.backgroundImage, metallicSurface(gold).background)
   assert.equal(style["--metallic-sheen"], "rgba(255, 253, 137, 0.55)")
 })
 

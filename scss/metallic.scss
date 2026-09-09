@@ -1,16 +1,3 @@
-// The stylesheet, from Sass: the `.metallic` class as metallic.css has it.
-//
-//   @use "metallic-colors/scss/metallic";                  // emits .metallic, settings forwarded
-//   @use "metallic-colors/scss/metallic" with ($band-angle: 135deg);
-//
-// For the mixins and settings alone: @use "metallic-colors/scss" as metallic;
-/*! metallic-colors — the surface class. Pair with metallicSurface() /
- *  metallicStyle() (JavaScript) or the surface mixin (Sass): the element's
- *  background is the four layers (flake, specular band, crossing band,
- *  body); this sheet supplies the flake blended soft-light so it grains the
- *  colour rather than greying it, the bevel, and the sweep of light that
- *  crosses the swatch on hover in the tone's own sheen (--metallic-sheen).
- *  Generated from scss/metallic.scss — edit there, then npm run build:css. */
 @forward "index";
 @use "index" as m;
 

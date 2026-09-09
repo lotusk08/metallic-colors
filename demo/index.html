@@ -6,25 +6,78 @@
 <meta name="description" content="Metallic paint swatches in CSS or Sass — layered gradients calibrated from photographed readings of the real surface.">
 <link rel="stylesheet" href="../metallic.css">
 <style>
-  :root { color-scheme: light; }
-  body { margin: 0; padding: 40px 32px 64px; background: #efeee9; color: #222; font: 15px/1.5 system-ui, -apple-system, sans-serif; }
-  main { max-width: 1120px; margin: 0 auto; }
-  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px 24px; margin-bottom: 8px; }
+  :root {
+    --bg: #efeee9; --fg: #1f1f1f; --muted: #616161; --line: #d9d7d0; --card: #ffffff; --accent: #1f5f3f; --code: #f6f5f1;
+    color-scheme: light;
+  }
+  body.dark { --bg: #17181a; --fg: #ececec; --muted: #9a9a9a; --line: #2e2f33; --card: #212226; --accent: #8fd0a9; --code: #1b1c1f; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 28px 72px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, sans-serif; transition: background .25s, color .25s; }
+  main { max-width: 1280px; margin: 0 auto; }
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 6px; }
   h1 { margin: 0; font-size: 28px; letter-spacing: -0.01em; }
-  h2 { margin: 40px 0 6px; font-size: 19px; }
-  p { margin: 0 0 18px; color: #555; max-width: 64ch; }
-  a { color: #1f5f3f; }
-  nav a { margin-left: 16px; font-size: 14px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; }
-  .tile { display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 8px; }
-  .lbl { margin-top: 7px; font-size: 13px; line-height: 1.3; }
-  .lbl small { display: block; color: #777; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; margin-top: 2px; }
-  form { display: grid; grid-template-columns: auto auto auto 1fr; gap: 12px 18px; align-items: center; max-width: 760px; }
-  label { display: grid; gap: 4px; font-size: 12px; color: #555; }
-  input[type=color] { width: 60px; height: 38px; padding: 0; border: 1px solid #ccc; border-radius: 6px; background: none; }
-  #custom { width: 100%; height: 168px; border-radius: 10px; }
-  pre { margin: 12px 0 0; padding: 12px 14px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; overflow-x: auto; }
-  @media (max-width: 640px) { form { grid-template-columns: repeat(3, auto); } #custom { grid-column: 1 / -1; } }
+  h2 { margin: 0 0 6px; font-size: 18px; }
+  h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  p { margin: 0 0 16px; color: var(--muted); max-width: 66ch; }
+  a { color: var(--accent); }
+  nav { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+  button { font: inherit; }
+  .btn { padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 32px; align-items: start; margin-top: 22px; }
+  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } .inspector { position: static !important; } }
+  section { margin-bottom: 40px; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .search { flex: 1 1 220px; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .card { border: 0; padding: 0; background: none; color: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .tile { display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 8px; transition: transform .15s; }
+  .card:hover .tile { transform: translateY(-2px); }
+  .card[aria-pressed=true] .tile { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  .lbl { margin-top: 6px; font-size: 12px; line-height: 1.3; }
+  .lbl small { display: block; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+  .empty { color: var(--muted); font-size: 14px; padding: 12px 0 28px; }
+
+  .inspector { position: sticky; top: 20px; display: grid; gap: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .preview { display: block; width: 100%; height: 190px; border-radius: 10px; touch-action: none; }
+  .preview.tilt::after { transition: none; transform: translateX(var(--sweep-x, -34%)); }
+  .who { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .who b { font-size: 17px; }
+  .who code { color: var(--muted); font-size: 12px; }
+  .readings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .reading { display: grid; gap: 4px; font-size: 11px; color: var(--muted); }
+  .reading i { display: block; height: 30px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  .reading code { font-size: 10px; color: var(--fg); }
+  .reading.derived code::after { content: " ·"; color: var(--muted); }
+  .controls { display: grid; gap: 8px; }
+  .ctl { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .ctl input[type=range] { width: 100%; }
+  .ctl output { text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg); }
+  .ctl.check { grid-template-columns: 96px 1fr; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+  .tabs button { padding: 6px 10px; border: 0; background: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); }
+  pre { position: relative; margin: 0; padding: 12px 12px 12px; background: var(--code); border: 1px solid var(--line); border-radius: 8px; font-size: 11.5px; line-height: 1.45; overflow: auto; max-height: 220px; white-space: pre-wrap; word-break: break-all; }
+  .copy { position: absolute; top: 8px; right: 8px; padding: 3px 8px; font-size: 11px; }
+
+  .builder { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 18px; align-items: end; max-width: 760px; }
+  .field { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+  .field .row { display: flex; align-items: center; gap: 8px; }
+  input[type=color] { width: 56px; height: 36px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+  .field input[type=text] { width: 90px; height: 36px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .field label.derive { display: flex; align-items: center; gap: 6px; }
+
+  .uses { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; align-items: center; }
+  .use { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .use small { color: var(--muted); font-size: 12px; }
+  .metal-text { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 90px 90px, auto, auto, auto; background-blend-mode: soft-light, normal, normal, normal; }
+  .metal-btn { justify-self: start; padding: 12px 22px; border: 0; border-radius: 999px; font-weight: 700; color: #1a1207; cursor: pointer; }
+  .metal-btn.light { color: #fff; }
+  .metal-badge { justify-self: start; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #1a1207; }
+  .metal-badge.light { color: #fff; }
+  .metal-ring { justify-self: center; width: 120px; height: 120px; border-radius: 50%; -webkit-mask: radial-gradient(circle, transparent 54%, #000 55%); mask: radial-gradient(circle, transparent 54%, #000 55%); }
+  .metal-card { height: 110px; border-radius: 12px; }
 </style>
 <body>
 <main>
@@ -33,71 +86,289 @@
     <nav>
       <a href="https://github.com/lotusk08/metallic-colors">GitHub</a>
       <a href="https://github.com/lotusk08/metallic-colors#readme">Docs</a>
+      <button class="btn" id="ground" type="button">Dark ground</button>
     </nav>
   </header>
-  <p>A metallic has no one colour. Each tile below is three readings of one painted surface — face-on, part-turned, and into the light — mixed in oklab and laid out as light would lay them. Hover a tile to sweep its sheen across it.</p>
+  <p>A metallic has no one colour. Each tile is three readings of one painted surface — face-on, part-turned, and into the light — mixed in oklab and laid out as light would lay them. Click a tile to inspect it; move over the preview to turn it in the light.</p>
 
-  <h2>Photographed deck</h2>
-  <p>Twenty-four wall-paint tones read from a printed colour card at three angles.</p>
-  <div class="grid" id="deck"></div>
+  <div class="layout">
+    <div>
+      <section>
+        <div class="toolbar">
+          <input class="search" id="search" type="search" placeholder="Search tones — gold, pearl, copper, M17…" aria-label="Search tones">
+          <span class="empty" id="count" style="padding:0"></span>
+        </div>
+        <h2>Photographed deck</h2>
+        <p>Twenty-four wall-paint tones read from a printed colour card at three angles.</p>
+        <div class="grid" id="deck"></div>
+        <h2>Classic metals</h2>
+        <p>The familiar metals, authored rather than photographed.</p>
+        <div class="grid" id="metals"></div>
+      </section>
 
-  <h2>Classic metals</h2>
-  <p>The familiar metals, authored rather than photographed.</p>
-  <div class="grid" id="metals"></div>
+      <section>
+        <h2>Your own tone</h2>
+        <p>A face colour and a sheen colour are enough; the mid reading and the flop are derived unless you set them.</p>
+        <form class="builder" id="builder">
+          <div class="field">Face<div class="row"><input type="color" name="face" value="#ec9d00"><input type="text" name="face-hex" value="#ec9d00" spellcheck="false"></div></div>
+          <div class="field">Sheen<div class="row"><input type="color" name="sheen" value="#fffd89"><input type="text" name="sheen-hex" value="#fffd89" spellcheck="false"></div></div>
+          <div class="field"><label class="derive"><input type="checkbox" name="mid-derive" checked> Mid — derive</label><div class="row"><input type="color" name="mid" value="#ffeb5e"><input type="text" name="mid-hex" value="#ffeb5e" spellcheck="false"></div></div>
+          <div class="field"><label class="derive"><input type="checkbox" name="flop-derive" checked> Flop — derive</label><div class="row"><input type="color" name="flop" value="#9a6a12"><input type="text" name="flop-hex" value="#9a6a12" spellcheck="false"></div></div>
+          <div class="field"><span>&nbsp;</span><button class="btn" type="button" id="use-custom">Inspect this tone →</button></div>
+        </form>
+      </section>
 
-  <h2>Your own tone</h2>
-  <p>A face colour and a sheen colour are enough; the mid reading and the flop are derived.</p>
-  <form id="form">
-    <label>Face <input type="color" name="face" value="#ec9d00"></label>
-    <label>Sheen <input type="color" name="sheen" value="#fffd89"></label>
-    <label>Mid <input type="color" name="mid" value="#ffeb5e"></label>
-    <span class="metallic" id="custom"></span>
-  </form>
-  <pre id="code"></pre>
+      <section>
+        <h2>Beyond swatches</h2>
+        <p>The same background on anything: text, a button, a badge, a ring, a card. All of these follow the inspected tone.</p>
+        <div class="uses">
+          <div class="use"><div class="metal-text" id="use-text">Metal</div><small>Text — <code>background-clip: text</code></small></div>
+          <div class="use"><button class="metallic metal-btn" id="use-btn" type="button">Order now</button><small>Button — the sweep plays on hover</small></div>
+          <div class="use"><span class="metallic metal-badge" id="use-badge">Limited edition</span><small>Badge</small></div>
+          <div class="use"><span class="metallic metallic-flat metal-ring" id="use-ring"></span><small>Ring — a mask over the surface</small></div>
+          <div class="use"><span class="metallic metal-card" id="use-card"></span><small>Card</small></div>
+        </div>
+      </section>
+    </div>
 
-  <script type="module">
-    import { metallicStyle } from "../dist/index.js"
-    import { PAINT_DECK, CLASSIC_METALS } from "../dist/presets.js"
-
-    const apply = (el, tone) => {
-      const s = metallicStyle(tone)
-      el.style.background = s.background
-      el.style.setProperty("--metallic-sheen", s["--metallic-sheen"])
-    }
-
-    const fill = (id, tones) => {
-      const grid = document.getElementById(id)
-      for (const tone of tones) {
-        const card = document.createElement("div")
-        const tile = document.createElement("span")
-        tile.className = "metallic tile"
-        tile.title = `${tone.name} · ${tone.face} → ${tone.sheen}`
-        apply(tile, tone)
-        const lbl = document.createElement("div")
-        lbl.className = "lbl"
-        lbl.innerHTML = `${tone.name}<small>${tone.code}</small>`
-        card.append(tile, lbl)
-        grid.append(card)
-      }
-    }
-    fill("deck", PAINT_DECK)
-    fill("metals", CLASSIC_METALS)
-
-    const form = document.getElementById("form")
-    const custom = document.getElementById("custom")
-    const code = document.getElementById("code")
-    const render = () => {
-      const f = new FormData(form)
-      const tone = { face: f.get("face"), sheen: f.get("sheen"), mid: f.get("mid") }
-      apply(custom, tone)
-      code.textContent =
-        `import { metallicStyle } from "metallic-colors"\n` +
-        `metallicStyle(${JSON.stringify(tone)})\n\n` +
-        `// or, in Sass:\n@include metallic.surface(${tone.face}, ${tone.sheen}, $mid: ${tone.mid});`
-    }
-    form.addEventListener("input", render)
-    render()
-  </script>
+    <aside class="inspector" aria-label="Inspector">
+      <span class="metallic preview" id="preview"></span>
+      <div class="who"><b id="who-name">Gold</b><code id="who-code">M17</code></div>
+      <div class="readings" id="readings"></div>
+      <div>
+        <h3>Recipe</h3>
+        <div class="controls" id="controls">
+          <label class="ctl">Band angle <input type="range" name="bandAngle" min="0" max="360" step="5" value="120"><output>120°</output></label>
+          <label class="ctl">Band alpha <input type="range" name="bandAlpha" min="0" max="1" step="0.05" value="0.55"><output>0.55</output></label>
+          <label class="ctl">Cross angle <input type="range" name="crossAngle" min="0" max="360" step="5" value="60"><output>60°</output></label>
+          <label class="ctl">Cross alpha <input type="range" name="crossAlpha" min="0" max="1" step="0.05" value="0.35"><output>0.35</output></label>
+          <label class="ctl">Flop drop <input type="range" name="flopDrop" min="0" max="0.3" step="0.01" value="0.1"><output>0.10</output></label>
+          <label class="ctl">Sweep alpha <input type="range" name="sweepAlpha" min="0" max="1" step="0.05" value="0.55"><output>0.55</output></label>
+          <label class="ctl check">Flake <input type="checkbox" name="flake" checked></label>
+          <div class="toolbar" style="margin:0"><button class="btn" type="button" id="reset">Reset recipe</button><button class="btn" type="button" id="tilt-permission" hidden>Enable tilt</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" aria-selected="true" data-tab="js">JavaScript</button>
+          <button role="tab" aria-selected="false" data-tab="sass">Sass</button>
+          <button role="tab" aria-selected="false" data-tab="react">React</button>
+          <button role="tab" aria-selected="false" data-tab="css">CSS</button>
+          <button role="tab" aria-selected="false" data-tab="json">JSON</button>
+        </div>
+        <pre id="snippet"><button class="btn copy" type="button" id="copy">Copy</button><code id="snippet-code"></code></pre>
+      </div>
+    </aside>
+  </div>
 </main>
+
+<script type="module">
+  import { metallicSurface, metallicStyle, readings, oklabToHex, DEFAULT_RECIPE } from "../dist/index.js"
+  import { PAINT_DECK, CLASSIC_METALS } from "../dist/presets.js"
+
+  const $ = (id) => document.getElementById(id)
+  const state = {
+    tone: { ...PAINT_DECK.find((t) => t.code === "M17") },
+    recipe: {},
+    tab: "js",
+  }
+
+  const apply = (el, tone, recipe = state.recipe) => {
+    const s = metallicStyle(tone, recipe)
+    el.style.backgroundImage = s.backgroundImage
+    el.style.setProperty("--metallic-sheen", s["--metallic-sheen"])
+  }
+  const tiles = []
+  const fill = (id, tones) => {
+    const grid = $(id)
+    for (const tone of tones) {
+      const card = document.createElement("button")
+      card.type = "button"
+      card.className = "card"
+      card.dataset.code = tone.code
+      card.dataset.text = `${tone.name} ${tone.code}`.toLowerCase()
+      const tile = document.createElement("span")
+      tile.className = "metallic tile"
+      const lbl = document.createElement("div")
+      lbl.className = "lbl"
+      lbl.innerHTML = `${tone.name}<small>${tone.code}</small>`
+      card.append(tile, lbl)
+      card.addEventListener("click", () => select(tone))
+      grid.append(card)
+      tiles.push({ card, tile, tone })
+    }
+  }
+  fill("deck", PAINT_DECK)
+  fill("metals", CLASSIC_METALS)
+
+  const renderTiles = () => {
+    for (const { card, tile, tone } of tiles) {
+      apply(tile, tone)
+      card.setAttribute("aria-pressed", String(tone.code === state.tone.code))
+    }
+  }
+
+  const luminance = (hex) => {
+    const n = parseInt(hex.slice(1), 16)
+    return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255
+  }
+  const renderInspector = () => {
+    const t = state.tone
+    apply($("preview"), t)
+    $("who-name").textContent = t.name ?? "Custom"
+    $("who-code").textContent = t.code ?? ""
+    const r = readings(t, state.recipe)
+    const rows = [
+      ["face", t.face, false],
+      ["mid", t.mid ?? oklabToHex(r.mid), !t.mid],
+      ["sheen", t.sheen, false],
+      ["flop", t.flop ?? oklabToHex(r.flop), !t.flop],
+    ]
+    $("readings").innerHTML = rows
+      .map(([k, hex, derived]) => `<div class="reading${derived ? " derived" : ""}" title="${derived ? "derived" : "reading"}"><i style="background:${hex}"></i>${k}<code>${hex}</code></div>`)
+      .join("")
+    const dark = luminance(t.face) < 0.5
+    apply($("use-text"), t)
+    for (const id of ["use-btn", "use-badge", "use-ring", "use-card"]) apply($(id), t)
+    $("use-btn").classList.toggle("light", dark)
+    $("use-badge").classList.toggle("light", dark)
+    renderSnippet()
+  }
+
+  const toneLiteral = (t) => {
+    const o = { face: t.face, sheen: t.sheen }
+    if (t.mid) o.mid = t.mid
+    if (t.flop) o.flop = t.flop
+    return o
+  }
+  const recipeLiteral = () => Object.fromEntries(Object.entries(state.recipe).filter(([k, v]) => v !== DEFAULT_RECIPE[k]))
+  const snippets = {
+    js: () => {
+      const rec = recipeLiteral()
+      return `import "metallic-colors/metallic.css"\nimport { metallicStyle } from "metallic-colors"\n\nconst style = metallicStyle(${JSON.stringify(toneLiteral(state.tone), null, 2)}${Object.keys(rec).length ? `, ${JSON.stringify(rec, null, 2)}` : ""})`
+    },
+    sass: () => {
+      const t = state.tone
+      const rec = recipeLiteral()
+      const kebab = (k) => k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase())
+      const withBlock = Object.keys(rec).length
+        ? ` with (\n${Object.entries(rec).map(([k, v]) => `  $${kebab(k)}: ${k.endsWith("Angle") ? v + "deg" : k === "flake" ? "none" : v},`).join("\n")}\n)`
+        : ""
+      const args = [t.face, t.sheen, t.mid ? `$mid: ${t.mid}` : null, t.flop ? `$flop: ${t.flop}` : null].filter(Boolean).join(", ")
+      return `@use "metallic-colors/scss/metallic"${withBlock};\n@use "metallic-colors/scss" as metallic;\n\n.swatch {\n  @include metallic.surface(${args});\n}`
+    },
+    react: () => {
+      const rec = recipeLiteral()
+      return `import "metallic-colors/metallic.css"\nimport { Metallic } from "metallic-colors/react"\n\n<Metallic\n  tone={${JSON.stringify(toneLiteral(state.tone))}}${Object.keys(rec).length ? `\n  recipe={${JSON.stringify(rec)}}` : ""}\n  className="h-24 w-24 rounded-lg"\n/>`
+    },
+    css: () => {
+      const s = metallicSurface(state.tone, state.recipe)
+      return `.swatch {\n  background-image: ${s.background};\n  --metallic-sheen: ${s.sweep};\n}`
+    },
+    json: () => JSON.stringify({ ...(state.tone.code ? { code: state.tone.code, name: state.tone.name } : {}), ...toneLiteral(state.tone) }, null, 2),
+  }
+  const renderSnippet = () => { $("snippet-code").textContent = snippets[state.tab]() }
+  $("tabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tab]")
+    if (!b) return
+    state.tab = b.dataset.tab
+    for (const t of $("tabs").querySelectorAll("[data-tab]")) t.setAttribute("aria-selected", String(t === b))
+    renderSnippet()
+  })
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("snippet-code").textContent); $("copy").textContent = "Copied"; setTimeout(() => ($("copy").textContent = "Copy"), 1200) } catch {}
+  })
+
+  const controls = $("controls")
+  const readControls = () => {
+    const rec = {}
+    for (const input of controls.querySelectorAll("input")) {
+      if (input.type === "checkbox") { if (!input.checked) rec.flake = null; continue }
+      const v = Number(input.value)
+      if (v !== DEFAULT_RECIPE[input.name]) rec[input.name] = v
+      input.nextElementSibling.value = input.name.endsWith("Angle") ? `${v}°` : v.toFixed(2)
+    }
+    state.recipe = rec
+    render()
+  }
+  controls.addEventListener("input", readControls)
+  $("reset").addEventListener("click", () => {
+    for (const input of controls.querySelectorAll("input")) {
+      if (input.type === "checkbox") input.checked = true
+      else input.value = DEFAULT_RECIPE[input.name]
+    }
+    readControls()
+  })
+
+  const select = (tone) => { state.tone = { ...tone }; render() }
+  const render = () => { renderTiles(); renderInspector() }
+
+  $("search").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase()
+    let shown = 0
+    for (const { card } of tiles) {
+      const hit = !q || card.dataset.text.includes(q)
+      card.hidden = !hit
+      if (hit) shown++
+    }
+    $("count").textContent = q ? `${shown} of ${tiles.length}` : ""
+  })
+
+  const builder = $("builder")
+  const hexOk = (v) => /^#[0-9a-f]{6}$/i.test(v)
+  builder.addEventListener("input", (e) => {
+    const { name, value } = e.target
+    if (name.endsWith("-hex")) {
+      if (hexOk(value)) builder.elements[name.replace("-hex", "")].value = value.toLowerCase()
+    } else if (e.target.type === "color") {
+      builder.elements[`${name}-hex`].value = value
+    }
+    if (name.endsWith("-derive")) {
+      const key = name.replace("-derive", "")
+      builder.elements[key].disabled = e.target.checked
+      builder.elements[`${key}-hex`].disabled = e.target.checked
+    }
+  })
+  builder.elements.mid.disabled = builder.elements["mid-hex"].disabled = true
+  builder.elements.flop.disabled = builder.elements["flop-hex"].disabled = true
+  const customTone = () => {
+    const f = builder.elements
+    const t = { face: f.face.value, sheen: f.sheen.value, name: "Custom" }
+    if (!f["mid-derive"].checked) t.mid = f.mid.value
+    if (!f["flop-derive"].checked) t.flop = f.flop.value
+    return t
+  }
+  $("use-custom").addEventListener("click", () => select(customTone()))
+
+  const preview = $("preview")
+  const setSweep = (x) => preview.style.setProperty("--sweep-x", `${(-34 + 68 * Math.max(0, Math.min(1, x))).toFixed(1)}%`)
+  preview.addEventListener("pointermove", (e) => {
+    preview.classList.add("tilt")
+    const r = preview.getBoundingClientRect()
+    setSweep((e.clientX - r.left) / r.width)
+  })
+  preview.addEventListener("pointerleave", () => preview.classList.remove("tilt"))
+  const onTilt = (e) => {
+    if (e.gamma == null) return
+    preview.classList.add("tilt")
+    setSweep((e.gamma + 45) / 90)
+  }
+  const coarse = matchMedia("(pointer: coarse)").matches
+  if (coarse && typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+    $("tilt-permission").hidden = false
+    $("tilt-permission").addEventListener("click", async () => {
+      try { if ((await DeviceOrientationEvent.requestPermission()) === "granted") { window.addEventListener("deviceorientation", onTilt); $("tilt-permission").hidden = true } } catch {}
+    })
+  } else if (coarse && "ondeviceorientation" in window) {
+    window.addEventListener("deviceorientation", onTilt)
+  }
+
+  $("ground").addEventListener("click", () => {
+    const dark = document.body.classList.toggle("dark")
+    $("ground").textContent = dark ? "Light ground" : "Dark ground"
+  })
+
+  render()
+</script>
 </body>
 </html>

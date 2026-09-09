@@ -1,16 +1,4 @@
 #!/usr/bin/env node
-/**
- * Turn per-photo readings into tones.
- *
- *   node scripts/merge-readings.mjs face=<a.json,b.json> mid=<c.json> sheen=<d.json> [paper=245] > tones.json
- *
- * Each named angle takes one or more files from sample-card.mjs (several
- * when a card spans pages). Every reading is divided by the paper beside
- * it and rescaled so paper = `paper` (default 245), which cancels the
- * exposure and colour cast of each photograph. A metallic turned into the
- * light outshines paper; such a reading is scaled down as a whole rather
- * than clipped per channel, so it keeps its hue instead of going white.
- */
 import fs from "node:fs"
 
 const args = Object.fromEntries(process.argv.slice(2).map((a) => a.split("=")))

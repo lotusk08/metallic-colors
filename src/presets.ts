@@ -1,18 +1,7 @@
 import type { Tone } from "./surface.ts"
 
-/** A named tone: readings plus the name and code it goes by. */
 export type PresetTone = Tone & { code: string; name: string }
 
-/**
- * Twenty-four metallic wall-paint tones, read from a printed colour card
- * photographed three times on 2026-09-09 — square-on (`face`), turned
- * part-way toward a window (`mid`), and turned into the light (`sheen`).
- * Every page was perspective-rectified before a swatch was sampled, and
- * every reading is normalised to the paper beside it (paper = #f5f5f5) so
- * the three exposures cancel; a reading brighter than the paper is scaled
- * as a whole, never clipped per channel, so it keeps its hue. See the
- * scripts in `scripts/` to calibrate a deck of your own.
- */
 export const PAINT_DECK: PresetTone[] = [
   { code: "M01", name: "Ivory Pearl",      face: "#fff9e2", mid: "#fffdf0", sheen: "#fafff3" },
   { code: "M02", name: "Champagne Pearl",  face: "#eedfc1", mid: "#fffcef", sheen: "#fcfffa" },
@@ -40,12 +29,6 @@ export const PAINT_DECK: PresetTone[] = [
   { code: "M24", name: "Deep Copper",      face: "#742900", mid: "#792e00", sheen: "#9a4b09" },
 ]
 
-/**
- * The familiar metals, authored rather than photographed: readings chosen
- * so that each renders the way the metal is remembered — chrome hard and
- * near-white at the flash, gunmetal with a deep flop, rose gold warm all
- * the way through. Use them as they are, or as starting points.
- */
 export const CLASSIC_METALS: PresetTone[] = [
   { code: "silver",     name: "Silver",     face: "#b9bcc2", mid: "#dfe2e6", sheen: "#ffffff" },
   { code: "chrome",     name: "Chrome",     face: "#9da3aa", mid: "#e8ecf0", sheen: "#ffffff", flop: "#4c5259" },
@@ -65,10 +48,8 @@ export const CLASSIC_METALS: PresetTone[] = [
   { code: "steel-blue", name: "Steel Blue", face: "#5c7a99", mid: "#93b1cc", sheen: "#d5e6f5" },
 ]
 
-/** Every preset, the paint deck first. */
 export const PRESETS: PresetTone[] = [...PAINT_DECK, ...CLASSIC_METALS]
 
-/** A preset by code — "M17", "rose-gold" — case-insensitively. */
 export const presetByCode = (code: string): PresetTone | undefined => {
   const key = code.trim().toLowerCase()
   return PRESETS.find((t) => t.code.toLowerCase() === key)

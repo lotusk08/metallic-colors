@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Assemble the demo as a static site (what GitHub Pages serves): the demo
-// page at the root, with dist/ and the stylesheet beside it.
 import fs from "node:fs"
 
 const out = "site"

@@ -1,11 +1,4 @@
-/**
- * oklab, the colour space the recipe mixes in. A straight line between two
- * colours in oklab is what the eye sees as an even ramp; the same line in
- * sRGB or HSL sags through mud, and a hue angle would wrap. Rectangular
- * (L, a, b) throughout — the only operation here is mixing.
- */
 
-/** A colour in rectangular oklab. */
 export type Oklab = { L: number; a: number; b: number }
 
 const lin = (v: number): number => {
@@ -21,7 +14,6 @@ const gam = (x: number): number => {
   return Math.round(Math.min(1, Math.max(0, y)) * 255)
 }
 
-/** sRGB hex (`#rrggbb`, with or without the hash) → rectangular oklab. */
 export function hexToOklab(hex: string): Oklab {
   const n = parseInt(hex.replace("#", ""), 16)
   if (Number.isNaN(n) || hex.replace("#", "").length !== 6) {
@@ -40,7 +32,6 @@ export function hexToOklab(hex: string): Oklab {
   }
 }
 
-/** Rectangular oklab → sRGB, each channel clamped to the gamut. */
 export function oklabToRgb({ L, a, b }: Oklab): [number, number, number] {
   const l_ = L + 0.3963377774 * a + 0.2158037573 * b
   const m_ = L - 0.1055613458 * a - 0.0638541728 * b
@@ -55,7 +46,6 @@ export function oklabToRgb({ L, a, b }: Oklab): [number, number, number] {
   ]
 }
 
-/** Rectangular oklab → `#rrggbb`. */
 export function oklabToHex(c: Oklab): string {
   return (
     "#" +
@@ -65,7 +55,6 @@ export function oklabToHex(c: Oklab): string {
   )
 }
 
-/** The point `t` of the way from `from` to `to`, in oklab. */
 export const mixOklab = (from: Oklab, to: Oklab, t: number): Oklab => ({
   L: from.L + (to.L - from.L) * t,
   a: from.a + (to.a - from.a) * t,

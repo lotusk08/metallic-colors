@@ -10,7 +10,6 @@ const blue = { face: "#527fb2", sheen: "#c5eeff" }
 const compile = (source: string) =>
   sass.compileString(source, { loadPaths: ["scss"], style: "expanded" }).css
 
-/** Every colour in a CSS text as [r, g, b, a] numbers, in order. */
 const colours = (css: string) =>
   [...css.matchAll(/rgba?\(([^)]+)\)/g)].map((m) =>
     m[1].split(/[\s,/]+/).filter(Boolean).map(Number)
@@ -35,7 +34,7 @@ test("the Sass surface matches the JavaScript surface to a channel step", () => 
   for (const [name, tone] of [["gold", gold], ["blue", blue]] as const) {
     const js = metallicSurface(tone)
     const block = rule(name)
-    const bg = block.slice(block.indexOf("background:"), block.indexOf("--metallic-sheen"))
+    const bg = block.slice(block.indexOf("background-image:"), block.indexOf("--metallic-sheen"))
     assert.ok(bg.includes("url("), `${name}: flake present`)
     assert.equal((bg.match(/linear-gradient\(/g) ?? []).length, 3, `${name}: three gradients`)
     close(colours(bg), colours(js.background), `${name} background`)
