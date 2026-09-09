@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>metallic-colors</title>
+<link rel="stylesheet" href="../metallic.css">
+<style>
+  body { margin: 0; padding: 32px; background: #efeee9; color: #222; font: 14px/1.5 system-ui, sans-serif; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  p { margin: 0 0 20px; color: #555; max-width: 60ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; margin-bottom: 36px; }
+  .tile { display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 8px; }
+  .lbl { margin-top: 6px; font-size: 12px; }
+  .lbl code { color: #777; }
+  form { display: grid; grid-template-columns: repeat(3, auto) 1fr; gap: 10px 16px; align-items: center; max-width: 720px; }
+  label { display: grid; gap: 4px; font-size: 12px; color: #555; }
+  input[type=color] { width: 56px; height: 36px; padding: 0; border: 1px solid #ccc; border-radius: 6px; background: none; }
+  #custom { width: 100%; height: 160px; border-radius: 10px; }
+</style>
+<body>
+  <h1>metallic-colors</h1>
+  <p>Each tile is three photographed readings of a painted sample — face-on, part-turned, and into the light — laid out as light would lay them. Hover a tile to sweep its sheen across it.</p>
+  <div class="grid" id="deck"></div>
+
+  <h1>Your own tone</h1>
+  <p>A face colour and a sheen colour are enough; the mid reading and the flop are derived.</p>
+  <form id="form">
+    <label>Face <input type="color" name="face" value="#ec9d00"></label>
+    <label>Sheen <input type="color" name="sheen" value="#fffd89"></label>
+    <label>Mid <input type="color" name="mid" value="#ffeb5e"></label>
+    <span class="metallic" id="custom"></span>
+  </form>
+
+  <script type="module">
+    import { metallicStyle } from "../dist/index.js"
+    import { NHU_DECK } from "../dist/presets.js"
+
+    const apply = (el, tone) => {
+      const s = metallicStyle(tone)
+      el.style.background = s.background
+      el.style.setProperty("--metallic-sheen", s["--metallic-sheen"])
+    }
+
+    const deck = document.getElementById("deck")
+    for (const tone of NHU_DECK) {
+      const card = document.createElement("div")
+      const tile = document.createElement("span")
+      tile.className = "metallic tile"
+      apply(tile, tone)
+      const lbl = document.createElement("div")
+      lbl.className = "lbl"
+      lbl.innerHTML = `${tone.name}<br><code>${tone.code}</code>`
+      card.append(tile, lbl)
+      deck.append(card)
+    }
+
+    const form = document.getElementById("form")
+    const custom = document.getElementById("custom")
+    const render = () => {
+      const f = new FormData(form)
+      apply(custom, { face: f.get("face"), sheen: f.get("sheen"), mid: f.get("mid") })
+    }
+    form.addEventListener("input", render)
+    render()
+  </script>
+</body>
+</html>

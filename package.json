@@ -1,0 +1,76 @@
+{
+  "name": "metallic-colors",
+  "version": "0.1.0",
+  "description": "Metallic paint swatches in CSS: layered gradients calibrated from three photographed readings of the real surface.",
+  "license": "MIT",
+  "author": "Steve Hoang (https://stevehoang.com)",
+  "homepage": "https://github.com/lotusk08/metallic-colors#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lotusk08/metallic-colors.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lotusk08/metallic-colors/issues"
+  },
+  "keywords": [
+    "metallic",
+    "metal",
+    "swatch",
+    "color",
+    "colour",
+    "paint",
+    "css",
+    "gradient",
+    "oklab",
+    "react"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./presets": {
+      "types": "./dist/presets.d.ts",
+      "import": "./dist/presets.js"
+    },
+    "./metallic.css": "./metallic.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "metallic.css",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "demo": "npm run build && npx --yes serve -l 4173 ."
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.1.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}
